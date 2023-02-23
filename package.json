@@ -1,0 +1,33 @@
+{
+  "name": "w3clock",
+  "version": "0.0.0",
+  "description": "UCAN based Merkle Clock as a service.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "merkle",
+    "clock",
+    "CRDT",
+    "IPFS",
+    "UCAN"
+  ],
+  "author": "Alan Shaw",
+  "license": "Apache-2.0 OR MIT",
+  "dependencies": {
+    "@alanshaw/pail": "^0.1.0",
+    "@ipld/dag-cbor": "^9.0.0",
+    "@ucanto/interface": "^4.2.3",
+    "@ucanto/principal": "^4.2.3",
+    "@ucanto/server": "^4.2.3",
+    "@ucanto/transport": "^4.2.3",
+    "@ucanto/validator": "^4.2.3",
+    "hashlru": "^2.3.0",
+    "multiformats": "^11.0.1"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20230115.0",
+    "standard": "^17.0.0"
+  }
+}
