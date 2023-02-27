@@ -3,8 +3,11 @@
   "version": "0.0.0",
   "description": "UCAN based Merkle Clock as a service.",
   "main": "index.js",
+  "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha",
+    "coverage": "c8 --reporter=text --reporter=html npm run test",
+    "lint": "standard"
   },
   "keywords": [
     "merkle",
@@ -28,6 +31,8 @@
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20230115.0",
+    "c8": "^7.13.0",
+    "mocha": "^10.2.0",
     "standard": "^17.0.0"
   }
 }

@@ -29,12 +29,16 @@ export class DurableClock {
     this.#fetcher = new GatewayBlockFetcher(env.GATEWAY_URL, env.BLOCK_CACHE_SIZE ? parseInt(env.BLOCK_CACHE_SIZE) : undefined)
   }
 
-  /** @param {Request} request */
+  /**
+   * @param {import('@cloudflare/workers-types').Request} request
+   * @returns {Promise<import('@cloudflare/workers-types').Response>}
+   */
   async fetch (request) {
     const body = /** @type {MethodCall} */ (await request.json())
     if (!API_METHODS.includes(body.method)) throw new Error(`invalid method: ${body.method}`)
     if (!this[body.method]) throw new Error(`not implemented: ${body.method}`)
     const res = await this[body.method](...body.args)
+    // @ts-expect-error
     return new Response(res && JSON.stringify(res))
   }
 
@@ -67,7 +71,11 @@ export class DurableClock {
       const emitters = followings.get(target) ?? new Set()
       if (emitters.has(emitter)) {
         emitters.delete(emitter)
-        followings.set(target, emitters)
+        if (emitters.size) {
+          followings.set(target, emitters)
+        } else {
+          followings.delete(target)
+        }
         await this.#state.storage.put(KEY_FOLLOWING, followings)
       }
     })
