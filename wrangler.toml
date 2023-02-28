@@ -1,0 +1,41 @@
+name = "w3clock"
+main = "src/index.js"
+compatibility_date = "2023-02-28"
+
+[build]
+command = "npm run build:debug"
+
+[durable_objects]
+bindings = [
+  { name = "CLOCK", class_name = "DurableClock_0" }
+]
+
+# Production!
+[env.production]
+workers_dev = false
+
+[env.production.build]
+command = "npm run build"
+
+# Staging!
+[env.staging]
+workers_dev = false
+
+[env.staging.build]
+command = "npm run build"
+
+# Test!
+[env.test]
+workers_dev = true
+
+[env.test.vars]
+DEBUG = "true"
+
+# Developers Developers Developers!
+
+[env.alanshaw]
+workers_dev = true
+account_id = "4fe12d085474d33bdcfd8e9bed4d8f95"
+
+[env.alanshaw.vars]
+DEBUG = "true"

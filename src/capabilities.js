@@ -2,6 +2,16 @@ import { capability, URI, Link, Failure } from '@ucanto/validator'
 import { sha256 } from 'multiformats/hashes/sha2'
 import * as cbor from '@ipld/dag-cbor'
 
+/**
+ * @typedef {import('@ucanto/interface').InferInvokedCapability<typeof top>} Top
+ * @typedef {import('@ucanto/interface').InferInvokedCapability<typeof clock>} Clock
+ * @typedef {import('@ucanto/interface').InferInvokedCapability<typeof follow>} ClockFollow
+ * @typedef {import('@ucanto/interface').InferInvokedCapability<typeof unfollow>} ClockUnfollow
+ * @typedef {import('@ucanto/interface').InferInvokedCapability<typeof following>} ClockFollowing
+ * @typedef {import('@ucanto/interface').InferInvokedCapability<typeof advance>} ClockAdvance
+ * @typedef {import('@ucanto/interface').InferInvokedCapability<typeof head>} ClockHead
+ */
+
 export const top = capability({
   can: '*',
   with: URI.match({ protocol: 'did:' }),

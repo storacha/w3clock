@@ -1,49 +1,53 @@
 import * as Server from '@ucanto/server'
-import * as ClockCapability from './capabilities.js'
+import * as ClockCaps from './capabilities.js'
 import * as Clock from './durable-clock.js'
 
 /**
  * @param {{ clockNamespace: import('@cloudflare/workers-types').DurableObjectNamespace }} conf
+ * @returns {import('./types').Service}
  */
 export function service ({ clockNamespace }) {
   return {
     clock: {
       follow: Server.provide(
-        ClockCapability.follow,
+        ClockCaps.follow,
         async ({ capability, invocation }) => {
           const clock = capability.with
           const target = capability.nb.clk ?? capability.with
           const emitter = capability.nb.iss ?? invocation.issuer.did()
           // @ts-expect-error
-          return await Clock.follow(clockNamespace, clock, target, emitter)
+          await Clock.follow(clockNamespace, clock, target, emitter)
+          return {}
         }
       ),
       unfollow: Server.provide(
-        ClockCapability.unfollow,
+        ClockCaps.unfollow,
         async ({ capability, invocation }) => {
           const clock = capability.with
           const target = capability.nb.clk ?? capability.with
           const emitter = capability.nb.iss ?? invocation.issuer.did()
           // @ts-expect-error
-          return await Clock.unfollow(clockNamespace, clock, target, emitter)
+          await Clock.unfollow(clockNamespace, clock, target, emitter)
+          return {}
         }
       ),
       following: Server.provide(
-        ClockCapability.following,
+        ClockCaps.following,
         async ({ capability }) => {
           // @ts-expect-error
-          return await Clock.following(clockNamespace, capability.with)
+          const followings = await Clock.following(clockNamespace, capability.with)
+          return [...followings.entries()].map(([k, v]) => [k, [...v.values()]])
         }
       ),
       advance: Server.provide(
-        ClockCapability.advance,
+        ClockCaps.advance,
         async ({ capability }) => {
           // @ts-expect-error
           return await Clock.advance(clockNamespace, capability.with, capability.nb.event)
         }
       ),
       head: Server.provide(
-        ClockCapability.head,
+        ClockCaps.head,
         async ({ capability }) => {
           // @ts-expect-error
           return await Clock.head(clockNamespace, capability.with)

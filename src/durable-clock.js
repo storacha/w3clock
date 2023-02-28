@@ -22,7 +22,7 @@ export class DurableClock {
 
   /**
    * @param {import('@cloudflare/workers-types').DurableObjectState} state
-   * @param {import('./bindings').Environment} env
+   * @param {import('./types').Environment} env
    */
   constructor (state, env) {
     this.#state = state

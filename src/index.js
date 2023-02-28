@@ -6,7 +6,7 @@ import { withCORSHeaders, withErrorHandler, withCORSPreflight, withHTTPPost, com
 import { service } from './service.js'
 
 export default {
-  /** @type {import('./bindings').Handler} */
+  /** @type {import('./types').Handler} */
   fetch (request, env, ctx) {
     console.log(request.method, request.url)
     const middleware = composeMiddleware(
@@ -19,7 +19,7 @@ export default {
   }
 }
 
-/** @type {import('./bindings').Handler} */
+/** @type {import('./types').Handler} */
 async function handler (request, env) {
   const signer = Signer.parse(env.PRIVATE_KEY)
   const server = Server.create({

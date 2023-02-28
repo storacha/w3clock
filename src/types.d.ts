@@ -1,7 +1,11 @@
 import { DurableObjectNamespace } from '@cloudflare/workers-types'
+import { Failure, ServiceMethod } from '@ucanto/interface'
+import { ClockFollow, ClockUnfollow, ClockFollowing, ClockAdvance, ClockHead } from './capabilities.js'
+import { ClockDID, EmitterDID } from './durable-clock.js'
+import { EventLink } from '@alanshaw/pail/clock'
 
 export interface Environment {
-  DEBUG: string
+  DEBUG?: string
   PRIVATE_KEY: string
   GATEWAY_URL?: string
   BLOCK_CACHE_SIZE?: string
@@ -26,4 +30,14 @@ export interface Handler<C extends Context = Context, E extends Environment = En
  */
 export interface Middleware<XC extends BC, BC extends Context = Context, E extends Environment = Environment> {
   (h: Handler<XC, E>): Handler<BC, E>
+}
+
+export interface Service {
+  clock: {
+    follow: ServiceMethod<ClockFollow, {}, Failure>
+    unfollow: ServiceMethod<ClockUnfollow, {}, Failure>
+    following: ServiceMethod<ClockFollowing, Array<[ClockDID, EmitterDID[]]>, Failure>
+    advance: ServiceMethod<ClockAdvance, EventLink<any>[], Failure>
+    head: ServiceMethod<ClockHead, EventLink<any>[], Failure>
+  }
 }

@@ -2,7 +2,7 @@ import { describe, it } from 'mocha'
 import assert from 'assert'
 import { Signer } from '@ucanto/principal/ed25519'
 import { DurableClock, follow, following, unfollow } from '../src/durable-clock.js'
-import { MockId, MockState, MockStorage, MockNamespace } from './helpers.js'
+import { MockState, MockStorage, MockNamespace } from './helpers/durable-objects.js'
 
 describe('DurableClock', () => {
   it('follows', async () => {

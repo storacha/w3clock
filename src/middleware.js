@@ -1,8 +1,8 @@
-/** @typedef {import('./bindings').Context} Context */
+/** @typedef {import('./types').Context} Context */
 
 /**
  * Adds CORS preflight headers to the response.
- * @type {import('./bindings').Middleware<Context>}
+ * @type {import('./types').Middleware<Context>}
  */
 export function withCORSPreflight (handler) {
   return async (request, env, ctx) => {
@@ -37,7 +37,7 @@ export function withCORSPreflight (handler) {
 
 /**
  * Adds CORS headers to the response.
- * @type {import('./bindings').Middleware<Context>}
+ * @type {import('./types').Middleware<Context>}
  */
 export function withCORSHeaders (handler) {
   return async (request, env, ctx) => {
@@ -56,7 +56,7 @@ export function withCORSHeaders (handler) {
 
 /**
  * Catches any errors, logs them and returns a suitable response.
- * @type {import('./bindings').Middleware<Context>}
+ * @type {import('./types').Middleware<Context>}
  */
 export function withErrorHandler (handler) {
   return async (request, env, ctx) => {
@@ -74,7 +74,7 @@ export function withErrorHandler (handler) {
 
 /**
  * Validates the request uses a HTTP POST method.
- * @type {import('./bindings').Middleware<Context>}
+ * @type {import('./types').Middleware<Context>}
  */
 export function withHTTPPost (handler) {
   return (request, env, ctx) => {
@@ -86,8 +86,8 @@ export function withHTTPPost (handler) {
 }
 
 /**
- * @param {...import('./bindings').Middleware<any, any, any>} middlewares
- * @returns {import('./bindings').Middleware<any, any, any>}
+ * @param {...import('./types').Middleware<any, any, any>} middlewares
+ * @returns {import('./types').Middleware<any, any, any>}
  */
 export function composeMiddleware (...middlewares) {
   return handler => middlewares.reduceRight((h, m) => m(h), handler)
