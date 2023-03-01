@@ -7,7 +7,7 @@ command = "npm run build:debug"
 
 [durable_objects]
 bindings = [
-  { name = "CLOCK", class_name = "DurableClock_0" }
+  { name = "CLOCK", class_name = "DurableClock0" }
 ]
 
 # Production!

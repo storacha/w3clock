@@ -3,12 +3,13 @@
   "version": "0.0.0",
   "description": "UCAN based Merkle Clock as a service.",
   "main": "dist/worker.mjs",
+  "module": "dist/worker.mjs",
   "type": "module",
   "scripts": {
     "dev": "npm run build:debug && miniflare dist/worker.mjs --watch --debug -m",
     "build": "esbuild --bundle src/index.js --format=esm --sourcemap --minify --outfile=dist/worker.mjs",
     "build:debug": "esbuild --bundle src/index.js --format=esm --outfile=dist/worker.mjs",
-    "test": "mocha",
+    "test": "mocha --experimental-vm-modules",
     "coverage": "c8 --reporter=text --reporter=html npm run test",
     "lint": "standard"
   },
@@ -24,11 +25,12 @@
   "dependencies": {
     "@alanshaw/pail": "^0.1.0",
     "@ipld/dag-cbor": "^9.0.0",
-    "@ucanto/interface": "^4.2.3",
-    "@ucanto/principal": "^4.2.3",
-    "@ucanto/server": "^4.2.3",
-    "@ucanto/transport": "^4.2.3",
-    "@ucanto/validator": "^4.2.3",
+    "@ucanto/client": "^4.4.0",
+    "@ucanto/interface": "^4.4.1",
+    "@ucanto/principal": "^4.4.0",
+    "@ucanto/server": "^4.4.1",
+    "@ucanto/transport": "^4.4.0",
+    "@ucanto/validator": "^4.4.0",
     "hashlru": "^2.3.0",
     "multiformats": "^11.0.1"
   },

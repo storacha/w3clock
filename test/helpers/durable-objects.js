@@ -101,7 +101,7 @@ class MockBasicStorage {
   }
 
   /**
-   * @param {number | Date} scheduledTime 
+   * @param {number | Date} scheduledTime
    * @param {import('@cloudflare/workers-types').DurableObjectSetAlarmOptions} [options]
    */
   async setAlarm (scheduledTime, options) {
@@ -122,7 +122,7 @@ export class MockStorage extends MockBasicStorage {
 
   /**
    * @template T
-   * @param {(txn: DurableObjectTransaction) => Promise<T>} closure 
+   * @param {(txn: DurableObjectTransaction) => Promise<T>} closure
    */
   async transaction (closure) {
     if (this.#inTxn) throw new Error('another transaction in progress')
@@ -180,7 +180,7 @@ export class MockState {
 
   /**
    * @template T
-   * @param {() => Promise<T>} callback 
+   * @param {() => Promise<T>} callback
    * @returns {Promise<T>}
    */
   async blockConcurrencyWhile (callback) {
@@ -204,12 +204,12 @@ export class MockNamespace {
   }
 
   /** @param {string} id */
-  idFromString(id) {
+  idFromString (id) {
     return new MockId(`mock[${id}]`)
   }
 
   /**
-   * @param {DurableObjectId} id 
+   * @param {DurableObjectId} id
    * @param {import('@cloudflare/workers-types').DurableObjectNamespaceGetDurableObjectOptions} [options]
    */
   get (id, options) {
@@ -220,7 +220,7 @@ export class MockNamespace {
 
   /**
    * @param {DurableObjectId} id
-   * @param {import('@cloudflare/workers-types').DurableObject} obj 
+   * @param {import('@cloudflare/workers-types').DurableObject} obj
    */
   set (id, obj) {
     this.#objects.set(id.toString(), obj)
@@ -237,7 +237,7 @@ class MockStub {
   #obj
 
   /**
-   * @param {DurableObjectId} id 
+   * @param {DurableObjectId} id
    * @param {import('@cloudflare/workers-types').DurableObject} obj
    * @param {{ name?: string }} [options]
    */
@@ -248,7 +248,7 @@ class MockStub {
   }
 
   /**
-   * @param {import('@cloudflare/workers-types').RequestInfo} input 
+   * @param {import('@cloudflare/workers-types').RequestInfo} input
    * @param {import('@cloudflare/workers-types').RequestInit<import('@cloudflare/workers-types').RequestInitCfProperties>} [init]
    */
   async fetch (input, init) {

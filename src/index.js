@@ -38,4 +38,4 @@ async function handler (request, env) {
   return new Response(body, { headers })
 }
 
-export { DurableClock as DurableClock_0 } from './durable-clock.js'
+export { DurableClock as DurableClock0 } from './durable-clock.js'

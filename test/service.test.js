@@ -1,4 +1,4 @@
-import { describe, it } from 'mocha'
+import { describe, it, beforeEach } from 'mocha'
 import assert from 'assert'
 import { Miniflare } from 'miniflare'
 import { Signer } from '@ucanto/principal/ed25519'
@@ -24,7 +24,7 @@ describe('UCAN service', () => {
       bindings: { PRIVATE_KEY: Signer.format(svc) }
     })
 
-    conn = miniflareConnection(mf)
+    conn = miniflareConnection(mf, svc)
   })
 
   it('follows', async () => {
@@ -32,7 +32,7 @@ describe('UCAN service', () => {
     const alice = await Signer.generate()
 
     // give alice access to issue follows to the clock
-    const proof = ClockCaps.follow.delegate({
+    const proof = await ClockCaps.follow.delegate({
       issuer: clock,
       audience: alice,
       with: clock.did()
@@ -43,11 +43,10 @@ describe('UCAN service', () => {
         issuer: alice,
         audience: svc,
         with: clock.did(),
-        nb: {},
         proofs: [proof]
       })
       .execute(conn)
 
-    assert(true)
+    assert(!res.error)
   })
 })

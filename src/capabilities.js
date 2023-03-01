@@ -1,4 +1,4 @@
-import { capability, URI, Link, Failure } from '@ucanto/validator'
+import { capability, URI, Link, Failure, Schema } from '@ucanto/validator'
 import { sha256 } from 'multiformats/hashes/sha2'
 import * as cbor from '@ipld/dag-cbor'
 
@@ -36,10 +36,10 @@ export const follow = base.derive({
   to: capability({
     can: 'clock/follow',
     with: URI.match({ protocol: 'did:' }),
-    nb: {
+    nb: Schema.struct({
       iss: URI.match({ protocol: 'did:' }).optional(),
       clk: URI.match({ protocol: 'did:' }).optional()
-    },
+    }),
     derives: equalWith
   }),
   derives: equalWith
@@ -52,10 +52,10 @@ export const unfollow = base.derive({
   to: capability({
     can: 'clock/unfollow',
     with: URI.match({ protocol: 'did:' }),
-    nb: {
+    nb: Schema.struct({
       iss: URI.match({ protocol: 'did:' }).optional(),
       clk: URI.match({ protocol: 'did:' }).optional()
-    },
+    }),
     derives: equalWith
   }),
   derives: equalWith
@@ -92,9 +92,9 @@ export const advance = base.derive({
   to: capability({
     can: 'clock/advance',
     with: URI.match({ protocol: 'did:' }),
-    nb: {
+    nb: Schema.struct({
       event: Link.match({ code: cbor.code, algorithm: sha256.code, version: 1 })
-    },
+    }),
     derives: equalWith
   }),
   derives: equalWith
