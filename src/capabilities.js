@@ -38,7 +38,7 @@ export const follow = base.derive({
     with: URI.match({ protocol: 'did:' }),
     nb: Schema.struct({
       iss: URI.match({ protocol: 'did:' }).optional(),
-      clk: URI.match({ protocol: 'did:' }).optional()
+      with: URI.match({ protocol: 'did:' }).optional()
     }),
     derives: equalWith
   }),
@@ -54,7 +54,7 @@ export const unfollow = base.derive({
     with: URI.match({ protocol: 'did:' }),
     nb: Schema.struct({
       iss: URI.match({ protocol: 'did:' }).optional(),
-      clk: URI.match({ protocol: 'did:' }).optional()
+      with: URI.match({ protocol: 'did:' }).optional()
     }),
     derives: equalWith
   }),

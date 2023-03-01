@@ -1,9 +1,6 @@
-import * as Server from '@ucanto/server'
-import * as CAR from '@ucanto/transport/car'
-import * as CBOR from '@ucanto/transport/cbor'
 import { Signer } from '@ucanto/principal/ed25519'
 import { withCORSHeaders, withErrorHandler, withCORSPreflight, withHTTPPost, composeMiddleware } from './middleware.js'
-import { service } from './service.js'
+import { createServer, createService } from './service.js'
 
 export default {
   /** @type {import('./types').Handler} */
@@ -22,13 +19,8 @@ export default {
 /** @type {import('./types').Handler} */
 async function handler (request, env) {
   const signer = Signer.parse(env.PRIVATE_KEY)
-  const server = Server.create({
-    id: signer,
-    encoder: CBOR,
-    decoder: CAR,
-    service: service({ clockNamespace: env.CLOCK }),
-    catch: err => console.error(err)
-  })
+  const service = createService({ clockNamespace: env.CLOCK })
+  const server = createServer(signer, service)
 
   const { headers, body } = await server.request({
     body: new Uint8Array(await request.arrayBuffer()),
