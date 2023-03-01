@@ -1,5 +1,5 @@
 import * as Server from '@ucanto/server'
-import * as ClockCaps from './capabilities.js'
+import * as ClockCaps from '../capabilities.js'
 import * as Clock from './durable-clock.js'
 
 /**

@@ -1,9 +1,14 @@
 name = "w3clock"
-main = "src/index.js"
+main = "src/worker/index.js"
 compatibility_date = "2023-02-28"
 
 [build]
 command = "npm run build:debug"
+
+[build.upload]
+format = "modules"
+dir = "dist"
+main = "worker.mjs"
 
 [durable_objects]
 bindings = [

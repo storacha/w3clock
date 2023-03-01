@@ -2,14 +2,12 @@
   "name": "w3clock",
   "version": "0.0.0",
   "description": "UCAN based Merkle Clock as a service.",
-  "main": "dist/worker.mjs",
-  "module": "dist/worker.mjs",
   "type": "module",
   "scripts": {
     "dev": "npm run build:debug && miniflare dist/worker.mjs --watch --debug -m",
-    "build": "esbuild --bundle src/index.js --format=esm --sourcemap --minify --outfile=dist/worker.mjs",
-    "build:debug": "esbuild --bundle src/index.js --format=esm --outfile=dist/worker.mjs",
-    "test": "mocha --experimental-vm-modules",
+    "build": "esbuild --bundle src/worker/index.js --format=esm --sourcemap --minify --outfile=dist/worker.mjs",
+    "build:debug": "esbuild --bundle src/worker/index.js --format=esm --outfile=dist/worker.mjs",
+    "test": "mocha --experimental-vm-modules 'test/**/*.test.js'",
     "coverage": "c8 --reporter=text --reporter=html npm run test",
     "lint": "standard"
   },

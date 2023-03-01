@@ -2,22 +2,21 @@ import { describe, it, beforeEach } from 'mocha'
 import assert from 'assert'
 import { Miniflare } from 'miniflare'
 import { Signer } from '@ucanto/principal/ed25519'
-import * as ClockCaps from '../src/capabilities.js'
-import { miniflareConnection } from './helpers/ucanto.js'
+import * as ClockCaps from '../../src/capabilities.js'
+import { miniflareConnection } from '../helpers/ucanto.js'
 
 describe('UCAN service', () => {
   /** @type {Signer.EdSigner} */
   let svc
   /** @type {Miniflare} */
   let mf
-  /** @type {import('@ucanto/interface').Connection<import('../src/types').Service>} */
+  /** @type {import('@ucanto/interface').Connection<import('../src/worker/types').Service>} */
   let conn
 
   beforeEach(async () => {
     svc = await Signer.generate()
 
     mf = new Miniflare({
-      packagePath: true,
       wranglerConfigPath: true,
       wranglerConfigEnv: 'test',
       modules: true,

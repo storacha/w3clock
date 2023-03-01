@@ -4,8 +4,8 @@ import { GatewayBlockFetcher } from './block.js'
 
 /**
  * @typedef {{ method: string, args: any[] }} MethodCall
- * @typedef {import('@ucanto/interface').DID} EmitterDID DID of an clock event emitter (usually an agent).
- * @typedef {import('@ucanto/interface').DID} ClockDID DID of a merkle clock.
+ * @typedef {import('../types').EmitterDID} EmitterDID DID of an clock event emitter (usually an agent).
+ * @typedef {import('../types').ClockDID} ClockDID DID of a merkle clock.
  * @typedef {Map<ClockDID, Set<EmitterDID>>} Followings Event emitters that this clock is following (and the associated clock DID they are contributing to).
  * @typedef {Map<ClockDID, Set<EmitterDID>>} Subscribers Clocks that want to receive advances made to this clock.
  */
