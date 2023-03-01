@@ -6,9 +6,9 @@
   "scripts": {
     "dev": "npm run build:debug && miniflare dist/worker.mjs --watch --debug -m",
     "build": "esbuild --bundle src/worker/index.js --format=esm --sourcemap --minify --outfile=dist/worker.mjs",
-    "build:debug": "esbuild --bundle src/worker/index.js --format=esm --outfile=dist/worker.mjs",
+    "build:debug": "esbuild --bundle src/worker/index.js --format=esm --sourcemap --outfile=dist/worker.mjs",
     "test": "mocha --experimental-vm-modules 'test/**/*.test.js'",
-    "coverage": "c8 --reporter=text --reporter=html npm run test",
+    "coverage": "c8 --reporter=text --reporter=html --exclude=node_modules --exclude=test --exclude-after-remap npm run test",
     "lint": "standard"
   },
   "keywords": [
