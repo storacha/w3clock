@@ -12,27 +12,16 @@ import * as cbor from '@ipld/dag-cbor'
  * @typedef {import('@ucanto/interface').InferInvokedCapability<typeof head>} ClockHead
  */
 
-export const top = capability({
-  can: '*',
+export const clock = capability({
+  can: 'clock/*',
   with: URI.match({ protocol: 'did:' }),
   derives: equalWith
 })
 
-export const clock = top.derive({
-  to: capability({
-    can: 'clock/*',
-    with: URI.match({ protocol: 'did:' }),
-    derives: equalWith
-  }),
-  derives: equalWith
-})
-
-const base = top.or(clock)
-
 /**
  * Follow advances made by an agent to a clock.
  */
-export const follow = base.derive({
+export const follow = clock.derive({
   to: capability({
     can: 'clock/follow',
     with: URI.match({ protocol: 'did:' }),
@@ -48,7 +37,7 @@ export const follow = base.derive({
 /**
  * Stop following advances made by an agent to a clock.
  */
-export const unfollow = base.derive({
+export const unfollow = clock.derive({
   to: capability({
     can: 'clock/unfollow',
     with: URI.match({ protocol: 'did:' }),
@@ -64,7 +53,7 @@ export const unfollow = base.derive({
 /**
  * List the agents this clock is following advances from.
  */
-export const following = base.derive({
+export const following = clock.derive({
   to: capability({
     can: 'clock/following',
     with: URI.match({ protocol: 'did:' }),
@@ -76,7 +65,7 @@ export const following = base.derive({
 /**
  * List the CIDs of the events at the head of this clock.
  */
-export const head = base.derive({
+export const head = clock.derive({
   to: capability({
     can: 'clock/head',
     with: URI.match({ protocol: 'did:' }),
@@ -88,7 +77,7 @@ export const head = base.derive({
 /**
  * Advance the clock by adding an event.
  */
-export const advance = base.derive({
+export const advance = clock.derive({
   to: capability({
     can: 'clock/advance',
     with: URI.match({ protocol: 'did:' }),
