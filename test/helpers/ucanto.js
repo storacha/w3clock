@@ -5,10 +5,10 @@ import * as HTTP from '@ucanto/transport/http'
 
 /**
  * Create a ucanto connection to a miniflare worker.
- * @template T
+ * @template {Record<string, any>} T
  * @param {import('miniflare').Miniflare} miniflare
  * @param {import('@ucanto/interface').Principal} servicePrincipal
- * @returns {import('@ucanto/interface').Connection<T>}
+ * @returns {import('@ucanto/interface').ConnectionView<T>}
  */
 export function miniflareConnection (miniflare, servicePrincipal) {
   return connect({

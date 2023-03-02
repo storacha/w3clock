@@ -10,7 +10,7 @@ describe('UCAN service', () => {
   let svc
   /** @type {Miniflare} */
   let mf
-  /** @type {import('@ucanto/interface').Connection<import('../../src/types').Service>} */
+  /** @type {import('@ucanto/interface').ConnectionView<import('../../src/types').Service>} */
   let conn
 
   beforeEach(async () => {
@@ -42,7 +42,8 @@ describe('UCAN service', () => {
         issuer: alice,
         audience: svc,
         with: clock.did(),
-        proofs: [proof]
+        proofs: [proof],
+        nb: {}
       })
       .execute(conn)
 
@@ -77,7 +78,8 @@ describe('UCAN service', () => {
         issuer: alice,
         audience: svc,
         with: clock.did(),
-        proofs
+        proofs,
+        nb: {}
       })
       .execute(conn)
 
@@ -90,7 +92,8 @@ describe('UCAN service', () => {
         issuer: alice,
         audience: svc,
         with: clock.did(),
-        proofs
+        proofs,
+        nb: {}
       })
       .execute(conn)
 
@@ -101,7 +104,8 @@ describe('UCAN service', () => {
         issuer: alice,
         audience: svc,
         with: clock.did(),
-        proofs
+        proofs,
+        nb: {}
       })
       .execute(conn)
 
@@ -117,7 +121,8 @@ describe('UCAN service', () => {
         issuer: alice,
         audience: svc,
         with: clock.did(),
-        proofs
+        proofs,
+        nb: {}
       })
       .execute(conn)
 
@@ -128,7 +133,8 @@ describe('UCAN service', () => {
         issuer: alice,
         audience: svc,
         with: clock.did(),
-        proofs
+        proofs,
+        nb: {}
       })
       .execute(conn)
 
