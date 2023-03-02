@@ -27,49 +27,257 @@ describe('UCAN service', () => {
   })
 
   it('follows', async () => {
-    const clock = await Signer.generate()
+    const sundial = await Signer.generate()
     const alice = await Signer.generate()
 
-    // give alice access to issue follows to the clock
-    const proof = await ClockCaps.follow.delegate({
-      issuer: clock,
-      audience: alice,
-      with: clock.did()
-    })
+    const proofs = [
+      // delegate alice ability to add follows to the clock
+      await ClockCaps.follow.delegate({
+        issuer: sundial,
+        audience: alice,
+        with: sundial.did()
+      }),
+      // delegate alice ability to ask the clock who it is following
+      await ClockCaps.following.delegate({
+        issuer: sundial,
+        audience: alice,
+        with: sundial.did()
+      })
+    ]
 
-    const res = await ClockCaps.follow
+    const res0 = await ClockCaps.follow
       .invoke({
         issuer: alice,
         audience: svc,
-        with: clock.did(),
-        proofs: [proof],
+        with: sundial.did(),
+        proofs,
         nb: {}
       })
       .execute(conn)
 
-    assert(!res.error)
+    assert(!res0.error)
+
+    const res1 = await ClockCaps.following
+      .invoke({
+        issuer: alice,
+        audience: svc,
+        with: sundial.did(),
+        proofs,
+        nb: {}
+      })
+      .execute(conn)
+
+    assert(!res1.error)
+    assert(Array.isArray(res1))
+    assert.equal(res1.length, 1)
+    assert.equal(res1[0][0], sundial.did())
+    assert(Array.isArray(res1[0][1]))
+    assert.equal(res1[0][1][0], alice.did())
+  })
+
+  it('follows a different clock', async () => {
+    const sundial = await Signer.generate()
+    const hourglass = await Signer.generate()
+    const alice = await Signer.generate()
+
+    const proofs = [
+      // delegate alice ability to add follows to sundial
+      await ClockCaps.follow.delegate({
+        issuer: sundial,
+        audience: alice,
+        with: sundial.did()
+      }),
+      // delegate alice ability to ask sundial who it is following
+      await ClockCaps.following.delegate({
+        issuer: sundial,
+        audience: alice,
+        with: sundial.did()
+      })
+    ]
+
+    const res0 = await ClockCaps.follow
+      .invoke({
+        issuer: alice,
+        audience: svc,
+        with: sundial.did(),
+        proofs,
+        nb: {
+          with: hourglass.did()
+        }
+      })
+      .execute(conn)
+
+    assert(!res0.error)
+
+    const res1 = await ClockCaps.following
+      .invoke({
+        issuer: alice,
+        audience: svc,
+        with: sundial.did(),
+        proofs,
+        nb: {}
+      })
+      .execute(conn)
+
+    assert(!res1.error)
+    assert(Array.isArray(res1))
+    assert.equal(res1.length, 1)
+    assert.equal(res1[0][0], hourglass.did())
+    assert(Array.isArray(res1[0][1]))
+    assert.equal(res1[0][1][0], alice.did())
+  })
+
+  it('follows delegated clock and issuer', async () => {
+    const sundial = await Signer.generate()
+    const hourglass = await Signer.generate()
+    const alice = await Signer.generate()
+    const bob = await Signer.generate()
+
+    const proofs = [
+      // delegate alice ability to add follows to sundial for the hourglass and bob
+      await ClockCaps.follow.delegate({
+        issuer: sundial,
+        audience: alice,
+        with: sundial.did(),
+        nb: {
+          iss: bob.did(),
+          with: hourglass.did()
+        }
+      }),
+      // delegate alice ability to ask sundial who it is following
+      await ClockCaps.following.delegate({
+        issuer: sundial,
+        audience: alice,
+        with: sundial.did()
+      })
+    ]
+
+    // alice should not be able to add alice (implicit)
+    const res0 = await ClockCaps.follow
+      .invoke({
+        issuer: alice,
+        audience: svc,
+        with: sundial.did(),
+        proofs,
+        nb: {
+          with: hourglass.did()
+        }
+      })
+      .execute(conn)
+
+    assert(res0.error)
+    assert.equal(res0.name, 'Unauthorized')
+    assert.ok(res0.message.includes('missing nb.iss on claimed capability'))
+
+    // alice should not be able to add follow for alice (explicit)
+    const res1 = await ClockCaps.follow
+      .invoke({
+        issuer: alice,
+        audience: svc,
+        with: sundial.did(),
+        proofs,
+        nb: {
+          iss: alice.did(),
+          with: hourglass.did()
+        }
+      })
+      .execute(conn)
+
+    assert(res1.error)
+    assert.equal(res1.name, 'Unauthorized')
+    assert.ok(res1.message.includes('mismatched nb.iss'))
+
+    // alice should not be able to add follow for sundial (implicit)
+    const res2 = await ClockCaps.follow
+      .invoke({
+        issuer: alice,
+        audience: svc,
+        with: sundial.did(),
+        proofs,
+        nb: {
+          iss: alice.did()
+        }
+      })
+      .execute(conn)
+
+    assert(res2.error)
+    assert.equal(res2.name, 'Unauthorized')
+    assert.ok(res2.message.includes('missing nb.with on claimed capability'))
+
+    // alice should not be able to add follow for sundial (explicit)
+    const res3 = await ClockCaps.follow
+      .invoke({
+        issuer: alice,
+        audience: svc,
+        with: sundial.did(),
+        proofs,
+        nb: {
+          iss: alice.did(),
+          with: sundial.did()
+        }
+      })
+      .execute(conn)
+
+    assert(res3.error)
+    assert.equal(res3.name, 'Unauthorized')
+    assert.ok(res3.message.includes('mismatched nb.with'))
+
+    // alice should be able to add follow for hourglass and bob (explicit)
+    const res4 = await ClockCaps.follow
+      .invoke({
+        issuer: alice,
+        audience: svc,
+        with: sundial.did(),
+        proofs,
+        nb: {
+          iss: bob.did(),
+          with: hourglass.did()
+        }
+      })
+      .execute(conn)
+
+    assert(!res4.error)
+
+    const res5 = await ClockCaps.following
+      .invoke({
+        issuer: alice,
+        audience: svc,
+        with: sundial.did(),
+        proofs,
+        nb: {}
+      })
+      .execute(conn)
+
+    assert(!res5.error)
+    assert(Array.isArray(res5))
+    assert.equal(res5.length, 1)
+    assert.equal(res5[0][0], hourglass.did())
+    assert(Array.isArray(res5[0][1]))
+    assert.equal(res5[0][1][0], bob.did())
   })
 
   it('unfollows', async () => {
-    const clock = await Signer.generate()
+    const sundial = await Signer.generate()
     const alice = await Signer.generate()
 
-    // give alice access to issue follows/unfollows to the clock
     const proofs = [
+      // delegate alice ability to add follows to sundial
       await ClockCaps.follow.delegate({
-        issuer: clock,
+        issuer: sundial,
         audience: alice,
-        with: clock.did()
+        with: sundial.did()
       }),
+      // delegate alice ability to remove follows from sundial
       await ClockCaps.unfollow.delegate({
-        issuer: clock,
+        issuer: sundial,
         audience: alice,
-        with: clock.did()
+        with: sundial.did()
       }),
+      // delegate alice ability to ask sundial who it is following
       await ClockCaps.following.delegate({
-        issuer: clock,
+        issuer: sundial,
         audience: alice,
-        with: clock.did()
+        with: sundial.did()
       })
     ]
 
@@ -77,7 +285,7 @@ describe('UCAN service', () => {
       .invoke({
         issuer: alice,
         audience: svc,
-        with: clock.did(),
+        with: sundial.did(),
         proofs,
         nb: {}
       })
@@ -91,7 +299,7 @@ describe('UCAN service', () => {
       .invoke({
         issuer: alice,
         audience: svc,
-        with: clock.did(),
+        with: sundial.did(),
         proofs,
         nb: {}
       })
@@ -103,7 +311,7 @@ describe('UCAN service', () => {
       .invoke({
         issuer: alice,
         audience: svc,
-        with: clock.did(),
+        with: sundial.did(),
         proofs,
         nb: {}
       })
@@ -112,7 +320,7 @@ describe('UCAN service', () => {
     assert(!res2.error)
     assert(Array.isArray(res2))
     assert.equal(res2.length, 1)
-    assert.equal(res2[0][0], clock.did())
+    assert.equal(res2[0][0], sundial.did())
     assert(Array.isArray(res2[0][1]))
     assert.equal(res2[0][1][0], alice.did())
 
@@ -120,7 +328,7 @@ describe('UCAN service', () => {
       .invoke({
         issuer: alice,
         audience: svc,
-        with: clock.did(),
+        with: sundial.did(),
         proofs,
         nb: {}
       })
@@ -132,7 +340,7 @@ describe('UCAN service', () => {
       .invoke({
         issuer: alice,
         audience: svc,
-        with: clock.did(),
+        with: sundial.did(),
         proofs,
         nb: {}
       })

@@ -21,81 +21,99 @@ export const clock = capability({
 /**
  * Follow advances made by an agent to a clock.
  */
-export const follow = clock.derive({
-  to: capability({
-    can: 'clock/follow',
-    with: URI.match({ protocol: 'did:' }),
-    nb: Schema.struct({
-      iss: URI.match({ protocol: 'did:' }).optional(),
-      with: URI.match({ protocol: 'did:' }).optional()
-    }),
-    derives: equalWith
+export const follow = capability({
+  can: 'clock/follow',
+  with: URI.match({ protocol: 'did:' }),
+  nb: Schema.struct({
+    iss: URI.match({ protocol: 'did:' }).optional(),
+    with: URI.match({ protocol: 'did:' }).optional()
   }),
-  derives: equalWith
+  derives: (claim, proof) => {
+    let result = equalCaveat('with', claim, proof)
+    if (result !== true) return result
+    result = equalCaveat('iss', claim, proof)
+    if (result !== true) return result
+    return equalWith(claim, proof)
+  }
 })
 
 /**
  * Stop following advances made by an agent to a clock.
  */
-export const unfollow = clock.derive({
-  to: capability({
-    can: 'clock/unfollow',
-    with: URI.match({ protocol: 'did:' }),
-    nb: Schema.struct({
-      iss: URI.match({ protocol: 'did:' }).optional(),
-      with: URI.match({ protocol: 'did:' }).optional()
-    }),
-    derives: equalWith
+export const unfollow = capability({
+  can: 'clock/unfollow',
+  with: URI.match({ protocol: 'did:' }),
+  nb: Schema.struct({
+    iss: URI.match({ protocol: 'did:' }).optional(),
+    with: URI.match({ protocol: 'did:' }).optional()
   }),
-  derives: equalWith
+  derives: (claim, proof) => {
+    let result = equalCaveat('with', claim, proof)
+    if (result !== true) return result
+    result = equalCaveat('iss', claim, proof)
+    if (result !== true) return result
+    return equalWith(claim, proof)
+  }
 })
 
 /**
  * List the agents this clock is following advances from.
  */
-export const following = clock.derive({
-  to: capability({
-    can: 'clock/following',
-    with: URI.match({ protocol: 'did:' }),
-    derives: equalWith
-  }),
+export const following = capability({
+  can: 'clock/following',
+  with: URI.match({ protocol: 'did:' }),
   derives: equalWith
 })
 
 /**
  * List the CIDs of the events at the head of this clock.
  */
-export const head = clock.derive({
-  to: capability({
-    can: 'clock/head',
-    with: URI.match({ protocol: 'did:' }),
-    derives: equalWith
-  }),
+export const head = capability({
+  can: 'clock/head',
+  with: URI.match({ protocol: 'did:' }),
   derives: equalWith
 })
 
 /**
  * Advance the clock by adding an event.
  */
-export const advance = clock.derive({
-  to: capability({
-    can: 'clock/advance',
-    with: URI.match({ protocol: 'did:' }),
-    nb: Schema.struct({
-      event: Link.match({ code: cbor.code, algorithm: sha256.code, version: 1 })
-    }),
-    derives: equalWith
+export const advance = capability({
+  can: 'clock/advance',
+  with: URI.match({ protocol: 'did:' }),
+  nb: Schema.struct({
+    event: Link.match({ version: 1, code: cbor.code, multihash: { code: sha256.code } })
   }),
   derives: equalWith
 })
 
 /**
+ * Checks that `nb.<prop>` on claimed capability is the same as `nb.<prop>`
+ * in delegated capability.
+ *
+ * @param {string} prop
+ * @param {import('@ucanto/interface').ParsedCapability} claim
+ * @param {import('@ucanto/interface').ParsedCapability} proof
+ */
+function equalCaveat (prop, claim, proof) {
+  if (proof.nb[prop] !== claim.nb[prop]) {
+    if (proof.nb[prop] == null && claim.nb[prop] != null) {
+      return new Failure(`missing nb.${prop} on delegated capability: ${claim.nb[prop]}`)
+    } else if (proof.nb[prop] != null && claim.nb[prop] == null) {
+      return new Failure(`missing nb.${prop} on claimed capability: ${proof.nb[prop]}`)
+    } else {
+      return new Failure(`mismatched nb.${prop}: ${claim.nb[prop]} != ${proof.nb[prop]}`)
+    }
+  }
+  return true
+}
+
+/**
  * Checks that `with` on claimed capability is the same as `with`
  * in delegated capability. Note this will ignore `can` field.
  *
- * @param {import('@ucanto/interface').ParsedCapability} child
- * @param {import('@ucanto/interface').ParsedCapability} parent
+ * @param {import('@ucanto/interface').ParsedCapability} claim
+ * @param {import('@ucanto/interface').ParsedCapability} proof
  */
-export function equalWith (child, parent) {
-  return child.with === parent.with || new Failure(`Can not derive ${child.can} with ${child.with} from ${parent.with}`)
+function equalWith (claim, proof) {
+  return claim.with === proof.with || new Failure(`Can not derive ${claim.can} with ${claim.with} from ${proof.with}`)
 }
