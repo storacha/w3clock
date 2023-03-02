@@ -29,3 +29,15 @@ After a successful invocation, any `clock/advance` invocations made by an issuer
 #### `clock/following`
 
 TBD
+
+#### `clock/unfollow`
+
+TBD
+
+#### `clock/advance`
+
+TBD
+
+#### `clock/head`
+
+TBD
