@@ -8,4 +8,24 @@
 </p>
 
 
-UCAN based merkle clock implemented as a peer on Cloudflare workers.
+UCAN based merkle clock implementation.
+
+## Background
+
+Merkle clocks are a method of recording events with partial order. This repo implements a method of managing merkle clocks with UCANs.
+
+### Capabilities
+
+#### `clock/follow`
+
+Follow advances made by an event issuer to a clock.
+
+Any actor can create an event to add to a clock, but how can access be restricted to a specific group?
+
+Access control is implemented by instructing a clock to follow events created by an issuer.
+
+After a successful invocation, any `clock/advance` invocations made by an issuer the clock is following will be permitted.
+
+#### `clock/following`
+
+TBD
