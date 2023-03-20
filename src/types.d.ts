@@ -7,12 +7,12 @@ export type ClockDID = DID
 /** DID of an clock event emitter (usually an agent). */
 export type EmitterDID = DID
 
-export interface Service {
+export interface Service<T> {
   clock: {
+    advance: ServiceMethod<ClockAdvance, EventLink<T>[], Failure>
+    head: ServiceMethod<ClockHead, EventLink<T>[], Failure>
     follow: ServiceMethod<ClockFollow, {}, Failure>
     unfollow: ServiceMethod<ClockUnfollow, {}, Failure>
     following: ServiceMethod<ClockFollowing, Array<[ClockDID, EmitterDID[]]>, Failure>
-    advance: ServiceMethod<ClockAdvance, EventLink<any>[], Failure>
-    head: ServiceMethod<ClockHead, EventLink<any>[], Failure>
   }
 }

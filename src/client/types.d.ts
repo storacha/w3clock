@@ -20,13 +20,13 @@ export interface InvocationConfig {
   proofs: Proof[]
 }
 
-export interface Connectable {
-  connection?: ConnectionView<Service>
+export interface Connectable<T> {
+  connection?: ConnectionView<Service<T>>
 }
 
-export interface RequestOptions extends Connectable {}
+export interface RequestOptions<T> extends Connectable<T> {}
 
-export interface FollowOptions extends RequestOptions {
+export interface FollowOptions<T> extends RequestOptions<T> {
   /**
    * Clock event issuer.
    */

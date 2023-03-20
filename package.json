@@ -1,12 +1,16 @@
 {
-  "name": "w3clock",
+  "name": "@web3-storage/w3clock",
   "version": "0.0.0",
   "description": "UCAN based Merkle Clock as a service.",
   "type": "module",
   "scripts": {
     "dev": "npm run build:debug && miniflare dist/worker.mjs --watch --debug -m",
-    "build": "esbuild --bundle src/worker/index.js --format=esm --sourcemap --minify --outfile=dist/worker.mjs",
-    "build:debug": "esbuild --bundle src/worker/index.js --format=esm --sourcemap --outfile=dist/worker.mjs",
+    "build": "npm run build:worker && npm run build:client",
+    "build:worker": "esbuild --bundle src/worker/index.js --format=esm --sourcemap --minify --outfile=dist/worker.mjs",
+    "build:worker:debug": "esbuild --bundle src/worker/index.js --format=esm --sourcemap --outfile=dist/worker.mjs",
+    "build:client": "npm run build:client:tsc && npm run build:client:cp",
+    "build:client:tsc": "tsc --build",
+    "build:client:cp": "cp src/types.d.ts dist/src && cp src/client/types.d.ts dist/src/client",
     "test": "mocha --experimental-vm-modules 'test/**/*.test.js'",
     "coverage": "c8 --reporter=text --reporter=html --exclude=node_modules --exclude=test --exclude-after-remap npm run test",
     "lint": "standard"
@@ -20,6 +24,38 @@
   ],
   "author": "Alan Shaw",
   "license": "Apache-2.0 OR MIT",
+  "exports": {
+    "./client": {
+      "types": "./dist/src/client/index.d.ts",
+      "import": "./src/client/index.js"
+    },
+    "./capabilities": {
+      "types": "./dist/src/capabilities.d.ts",
+      "import": "./src/client/capabilities.js"
+    }
+  },
+  "typesVersions": {
+    "*": {
+      "*": [
+        "dist/*"
+      ],
+      "client": [
+        "dist/src/client/index.d.ts"
+      ],
+      "capabilities": [
+        "dist/src/capabilities.d.ts"
+      ]
+    }
+  },
+  "files": [
+    "src/capabilities.js",
+    "src/types.d.ts",
+    "src/client",
+    "dist/src/capabilities.d.ts",
+    "dist/src/capabilities.d.ts.map",
+    "dist/src/types.d.ts",
+    "dist/src/client"
+  ],
   "dependencies": {
     "@alanshaw/pail": "^0.1.0",
     "@ipld/dag-cbor": "^9.0.0",
@@ -39,6 +75,12 @@
     "miniflare": "^2.12.1",
     "mocha": "^10.2.0",
     "standard": "^17.0.0",
+    "typescript": "^5.0.2",
     "wrangler": "^2.12.0"
+  },
+  "standard": {
+    "ignore": [
+      "*.ts"
+    ]
   }
 }

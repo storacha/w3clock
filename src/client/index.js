@@ -7,14 +7,68 @@ export const SERVICE_URL = 'http://clock.web3.storage'
 export const SERVICE_PRINCIPAL = 'did:web:clock.web3.storage'
 
 /**
+ * Advance the clock by adding an event.
+ *
+ * @template T
+ * @param {import('./types').InvocationConfig} conf
+ * @param {import('@alanshaw/pail/clock').EventLink<T>} event
+ * @param {import('./types').RequestOptions<T>} [options]
+ */
+export async function advance ({ issuer, with: resource, proofs, audience }, event, options) {
+  const conn = options?.connection ?? connect()
+  const result = await ClockCaps.advance
+    .invoke({
+      issuer,
+      audience: audience ?? conn.id,
+      with: resource,
+      nb: { event },
+      proofs
+    })
+    .execute(conn)
+
+  if (result.error) {
+    throw new Error(`failed ${ClockCaps.advance.can} invocation`, { cause: result })
+  }
+
+  return result
+}
+
+/**
+ * Retrieve the clock head.
+ *
+ * @template T
+ * @param {import('./types').InvocationConfig} conf
+ * @param {import('./types').RequestOptions<T>} [options]
+ */
+export async function head ({ issuer, with: resource, proofs, audience }, options) {
+  const conn = options?.connection ?? connect()
+  const result = await ClockCaps.head
+    .invoke({
+      issuer,
+      audience: audience ?? conn.id,
+      with: resource,
+      nb: {},
+      proofs
+    })
+    .execute(conn)
+
+  if (result.error) {
+    throw new Error(`failed ${ClockCaps.advance.can} invocation`, { cause: result })
+  }
+
+  return result
+}
+
+/**
  * Instruct a clock to follow the issuer, or optionally a different issuer,
  * contributing to a different clock.
  *
+ * @template T
  * @param {import('./types').InvocationConfig} conf
- * @param {import('./types').FollowOptions} [options]
+ * @param {import('./types').FollowOptions<T>} [options]
  */
 export async function follow ({ issuer, with: resource, proofs, audience }, options) {
-  const conn = options.connection ?? connect()
+  const conn = options?.connection ?? connect()
   const result = await ClockCaps.follow
     .invoke({
       issuer,
@@ -36,7 +90,8 @@ export async function follow ({ issuer, with: resource, proofs, audience }, opti
 }
 
 /**
- * @returns {import('@ucanto/interface').ConnectionView<import('../types').Service>}
+ * @template T
+ * @returns {import('@ucanto/interface').ConnectionView<import('../types').Service<T>>}
  */
 export function connect () {
   return clientConnect({

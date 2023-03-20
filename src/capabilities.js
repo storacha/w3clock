@@ -1,9 +1,6 @@
 import { capability, URI, Link, Failure, Schema } from '@ucanto/validator'
-import { sha256 } from 'multiformats/hashes/sha2'
-import * as cbor from '@ipld/dag-cbor'
 
 /**
- * @typedef {import('@ucanto/interface').InferInvokedCapability<typeof top>} Top
  * @typedef {import('@ucanto/interface').InferInvokedCapability<typeof clock>} Clock
  * @typedef {import('@ucanto/interface').InferInvokedCapability<typeof follow>} ClockFollow
  * @typedef {import('@ucanto/interface').InferInvokedCapability<typeof unfollow>} ClockUnfollow
@@ -81,7 +78,7 @@ export const advance = capability({
   can: 'clock/advance',
   with: URI.match({ protocol: 'did:' }),
   nb: Schema.struct({
-    event: Link.match({ version: 1, code: cbor.code, multihash: { code: sha256.code } })
+    event: Link.match({ version: 1 })
   }),
   derives: equalWith
 })

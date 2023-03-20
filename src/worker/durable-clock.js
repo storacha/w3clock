@@ -1,4 +1,4 @@
-import * as Clock from '@alanshaw/pail/clock.js'
+import * as Clock from '@alanshaw/pail/clock'
 import { parse } from 'multiformats/link'
 import { GatewayBlockFetcher } from './block.js'
 
@@ -8,11 +8,13 @@ import { GatewayBlockFetcher } from './block.js'
  * @typedef {import('../types').ClockDID} ClockDID DID of a merkle clock.
  * @typedef {Map<ClockDID, Set<EmitterDID>>} Followings Event emitters that this clock is following (and the associated clock DID they are contributing to).
  * @typedef {Map<ClockDID, Set<EmitterDID>>} Subscribers Clocks that want to receive advances made to this clock.
+ * @typedef {'follow'|'unfollow'|'following'|'subscribe'|'unsubscribe'|'subscribers'|'advance'|'head'} DurableClockAPIMethod
  */
 
 const KEY_FOLLOWING = 'following'
 const KEY_SUBSCRIBERS = 'subscribers'
 const KEY_HEAD = 'head'
+/** @type {DurableClockAPIMethod[]} */
 const API_METHODS = ['follow', 'unfollow', 'following', 'subscribe', 'unsubscribe', 'subscribers', 'advance', 'head']
 
 /** @type {import('@cloudflare/workers-types').DurableObject} */
@@ -35,9 +37,10 @@ export class DurableClock {
    */
   async fetch (request) {
     const body = /** @type {MethodCall} */ (await request.json())
-    if (!API_METHODS.includes(body.method)) throw new Error(`invalid method: ${body.method}`)
-    if (!this[body.method]) throw new Error(`not implemented: ${body.method}`)
-    const res = await this[body.method](...body.args)
+    const method = API_METHODS.find(m => m === body.method)
+    if (!method) throw new Error(`invalid method: ${body.method}`)
+    if (typeof this[method] !== 'function') throw new Error(`not implemented: ${method}`)
+    const res = await this[method](...body.args)
     // @ts-expect-error
     return new Response(res && JSON.stringify(res))
   }
@@ -149,15 +152,9 @@ export class DurableClock {
   }
 
   /**
-   * @param {ClockDID} target Target clock to advance.
-   * @param {EmitterDID} emitter Event emitter (usually an agent) who emits the events.
    * @param {import('@alanshaw/pail/clock').EventLink<any>} event
    */
-  async advance (target, emitter, event) {
-    /** @type {Followings} */
-    const followings = (await this.#state.storage.get(KEY_FOLLOWING)) ?? new Map()
-    const emitters = followings.get(target)
-    if (!emitters || !emitters.has(emitter)) return
+  async advance (event) {
     return await this.#state.blockConcurrencyWhile(async () => {
       const head = (await Clock.advance(this.#fetcher, await this.#head(), event))
       await this.#setHead(head)
