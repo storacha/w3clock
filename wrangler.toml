@@ -3,7 +3,7 @@ main = "src/worker/index.js"
 compatibility_date = "2023-02-28"
 
 [build]
-command = "npm run build:debug"
+command = "npm run build:worker:debug"
 
 [build.upload]
 format = "modules"
