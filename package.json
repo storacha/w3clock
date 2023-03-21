@@ -1,5 +1,5 @@
 {
-  "name": "@web3-storage/w3clock",
+  "name": "@web3-storage/clock",
   "version": "0.1.0",
   "description": "UCAN based Merkle Clock as a service.",
   "type": "module",
