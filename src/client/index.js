@@ -94,15 +94,18 @@ export async function follow ({ issuer, with: resource, proofs, audience }, opti
 
 /**
  * @template T
+ * @param {object} [options]
+ * @param {import('@ucanto/interface').Principal} [options.servicePrincipal]
+ * @param {URL} [options.serviceURL]
  * @returns {import('@ucanto/interface').ConnectionView<import('../service').Service<T>>}
  */
-export function connect () {
+export function connect (options) {
   return clientConnect({
-    id: DID.parse(SERVICE_PRINCIPAL),
+    id: options?.servicePrincipal ?? DID.parse(SERVICE_PRINCIPAL),
     encoder: CAR,
     decoder: CBOR,
     channel: HTTP.open({
-      url: new URL(SERVICE_URL),
+      url: options?.serviceURL ?? new URL(SERVICE_URL),
       method: 'POST'
     })
   })
