@@ -8,9 +8,7 @@
     "build": "npm run build:worker && npm run build:client",
     "build:worker": "esbuild --bundle src/worker/index.js --format=esm --sourcemap --minify --outfile=dist/worker.mjs",
     "build:worker:debug": "esbuild --bundle src/worker/index.js --format=esm --sourcemap --outfile=dist/worker.mjs",
-    "build:client": "npm run build:client:tsc && npm run build:client:cp",
-    "build:client:tsc": "tsc --build",
-    "build:client:cp": "cp src/types.d.ts dist/src && cp src/client/types.d.ts dist/src/client",
+    "build:client": "tsc --build",
     "test": "mocha --experimental-vm-modules 'test/**/*.test.js'",
     "coverage": "c8 --reporter=text --reporter=html --exclude=node_modules --exclude=test --exclude-after-remap npm run test",
     "lint": "standard"

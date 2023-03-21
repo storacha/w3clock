@@ -7,7 +7,7 @@ import * as Clock from './durable-clock.js'
 /**
  * @template T
  * @param {Server.Verifier} signer
- * @param {import('../types').Service<T>} service
+ * @param {import('../service').Service<T>} service
  */
 export function createServer (signer, service) {
   return Server.create({
@@ -22,7 +22,7 @@ export function createServer (signer, service) {
 /**
  * @template T
  * @param {{ clockNamespace: import('@cloudflare/workers-types').DurableObjectNamespace }} conf
- * @returns {import('../types').Service<T>}
+ * @returns {import('../service').Service<T>}
  */
 export function createService ({ clockNamespace }) {
   return {

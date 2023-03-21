@@ -1,5 +1,5 @@
 import { Signer, Proof, DID, Principal, ConnectionView } from '@ucanto/interface'
-import { Service } from '../types'
+import { Service } from '../service'
 
 export interface InvocationConfig {
   /**

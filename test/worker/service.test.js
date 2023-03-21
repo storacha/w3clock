@@ -10,7 +10,7 @@ describe('UCAN service', () => {
   let svc
   /** @type {Miniflare} */
   let mf
-  /** @type {import('@ucanto/interface').ConnectionView<import('../../src/types').Service>} */
+  /** @type {import('@ucanto/interface').ConnectionView<import('../../src/service').Service>} */
   let conn
 
   beforeEach(async () => {

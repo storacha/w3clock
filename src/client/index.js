@@ -3,6 +3,9 @@ import { CAR, CBOR, HTTP } from '@ucanto/transport'
 import * as DID from '@ipld/dag-ucan/did'
 import * as ClockCaps from '../capabilities.js'
 
+export * from './api.js'
+export * from '../service.js'
+
 export const SERVICE_URL = 'http://clock.web3.storage'
 export const SERVICE_PRINCIPAL = 'did:web:clock.web3.storage'
 
@@ -10,9 +13,9 @@ export const SERVICE_PRINCIPAL = 'did:web:clock.web3.storage'
  * Advance the clock by adding an event.
  *
  * @template T
- * @param {import('./types').InvocationConfig} conf
+ * @param {import('./api').InvocationConfig} conf
  * @param {import('@alanshaw/pail/clock').EventLink<T>} event
- * @param {import('./types').RequestOptions<T>} [options]
+ * @param {import('./api').RequestOptions<T>} [options]
  */
 export async function advance ({ issuer, with: resource, proofs, audience }, event, options) {
   const conn = options?.connection ?? connect()
@@ -37,8 +40,8 @@ export async function advance ({ issuer, with: resource, proofs, audience }, eve
  * Retrieve the clock head.
  *
  * @template T
- * @param {import('./types').InvocationConfig} conf
- * @param {import('./types').RequestOptions<T>} [options]
+ * @param {import('./api').InvocationConfig} conf
+ * @param {import('./api').RequestOptions<T>} [options]
  */
 export async function head ({ issuer, with: resource, proofs, audience }, options) {
   const conn = options?.connection ?? connect()
@@ -64,8 +67,8 @@ export async function head ({ issuer, with: resource, proofs, audience }, option
  * contributing to a different clock.
  *
  * @template T
- * @param {import('./types').InvocationConfig} conf
- * @param {import('./types').FollowOptions<T>} [options]
+ * @param {import('./api').InvocationConfig} conf
+ * @param {import('./api').FollowOptions<T>} [options]
  */
 export async function follow ({ issuer, with: resource, proofs, audience }, options) {
   const conn = options?.connection ?? connect()
@@ -91,7 +94,7 @@ export async function follow ({ issuer, with: resource, proofs, audience }, opti
 
 /**
  * @template T
- * @returns {import('@ucanto/interface').ConnectionView<import('../types').Service<T>>}
+ * @returns {import('@ucanto/interface').ConnectionView<import('../service').Service<T>>}
  */
 export function connect () {
   return clientConnect({
