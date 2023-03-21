@@ -6,7 +6,7 @@ import * as ClockCaps from '../capabilities.js'
 export * from './api.js'
 export * from '../service.js'
 
-export const SERVICE_URL = 'http://clock.web3.storage'
+export const SERVICE_URL = 'https://clock.web3.storage'
 export const SERVICE_PRINCIPAL = 'did:web:clock.web3.storage'
 
 /**

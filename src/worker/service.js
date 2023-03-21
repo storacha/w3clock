@@ -59,9 +59,9 @@ export function createService ({ clockNamespace }) {
       ),
       advance: Server.provide(
         ClockCaps.advance,
-        async ({ capability }) => {
+        async ({ capability, invocation }) => {
           // @ts-expect-error
-          return await Clock.advance(clockNamespace, capability.with, capability.nb.event)
+          return await Clock.advance(clockNamespace, capability.with, invocation.issuer.did(), capability.nb.event)
         }
       ),
       head: Server.provide(

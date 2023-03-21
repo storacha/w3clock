@@ -9,7 +9,7 @@ export class GatewayBlockFetcher {
    * @param {number} [cacheSize]
    */
   constructor (url, cacheSize) {
-    this.#url = new URL(url ?? 'https://freeway.dag.haus')
+    this.#url = new URL(url ?? 'https://ipfs.io')
     this.#cache = lru(cacheSize ?? 100)
   }
 

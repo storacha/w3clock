@@ -4,7 +4,7 @@
   "description": "UCAN based Merkle Clock as a service.",
   "type": "module",
   "scripts": {
-    "dev": "npm run build:debug && miniflare dist/worker.mjs --watch --debug -m",
+    "dev": "npm run build:worker:debug && miniflare dist/worker.mjs --watch --debug -m",
     "build": "npm run build:worker && npm run build:client",
     "build:worker": "esbuild --bundle src/worker/index.js --format=esm --sourcemap --minify --outfile=dist/worker.mjs",
     "build:worker:debug": "esbuild --bundle src/worker/index.js --format=esm --sourcemap --outfile=dist/worker.mjs",
