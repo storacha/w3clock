@@ -46,12 +46,10 @@
     }
   },
   "files": [
-    "src/capabilities.js",
-    "src/types.d.ts",
+    "src/*.js",
     "src/client",
-    "dist/src/capabilities.d.ts",
-    "dist/src/capabilities.d.ts.map",
-    "dist/src/types.d.ts",
+    "dist/src/*.d.ts",
+    "dist/src/*.d.ts.map",
     "dist/src/client"
   ],
   "dependencies": {
