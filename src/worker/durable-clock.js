@@ -1,5 +1,6 @@
 import * as Clock from '@alanshaw/pail/clock'
 import { parse } from 'multiformats/link'
+import * as cbor from '@ipld/dag-cbor'
 import { GatewayBlockFetcher } from './block.js'
 
 /**
@@ -36,13 +37,13 @@ export class DurableClock {
    * @returns {Promise<import('@cloudflare/workers-types').Response>}
    */
   async fetch (request) {
-    const body = /** @type {MethodCall} */ (await request.json())
+    const body = /** @type {MethodCall} */ (cbor.decode(new Uint8Array(await request.arrayBuffer())))
     const method = API_METHODS.find(m => m === body.method)
     if (!method) throw new Error(`invalid method: ${body.method}`)
     if (typeof this[method] !== 'function') throw new Error(`not implemented: ${method}`)
     const res = await this[method](...body.args)
     // @ts-expect-error
-    return new Response(res && JSON.stringify(res))
+    return new Response(res && cbor.encode(res))
   }
 
   /**
@@ -134,21 +135,17 @@ export class DurableClock {
     return [...subscribers.entries()].map(([k, v]) => [k, [...v.values()]])
   }
 
-  /** @returns {Promise<import('@alanshaw/pail/clock').EventLink<any>[]>} */
-  async #head () {
-    // TODO: keep sync'd copy in memory
-    /** @type {string[]} */
-    const head = (await this.#state.storage.get(KEY_HEAD)) ?? []
-    return head.map(h => parse(h))
-  }
-
   /** @param {import('@alanshaw/pail/clock').EventLink<any>[]} head */
   async #setHead (head) {
     await this.#state.storage.put(KEY_HEAD, head.map(h => String(h)))
   }
 
+  /** @returns {Promise<import('@alanshaw/pail/clock').EventLink<any>[]>} */
   async head () {
-    return (await this.#head()).map(h => String(h))
+    // TODO: keep sync'd copy in memory
+    /** @type {string[]} */
+    const head = (await this.#state.storage.get(KEY_HEAD)) ?? []
+    return head.map(h => parse(h))
   }
 
   /**
@@ -156,7 +153,7 @@ export class DurableClock {
    */
   async advance (event) {
     return await this.#state.blockConcurrencyWhile(async () => {
-      const head = (await Clock.advance(this.#fetcher, await this.#head(), event))
+      const head = (await Clock.advance(this.#fetcher, await this.head(), event))
       await this.#setHead(head)
       return head
     })
@@ -171,7 +168,7 @@ export class DurableClock {
  */
 export async function follow (clockNamespace, clock, target, emitter) {
   const stub = clockNamespace.get(clockNamespace.idFromName(clock))
-  const body = JSON.stringify({ method: 'follow', args: [target, emitter] })
+  const body = cbor.encode({ method: 'follow', args: [target, emitter] })
   await stub.fetch('http://localhost', { method: 'POST', body })
   if (clock !== target) {
     await subscribe(clockNamespace, target, clock, emitter)
@@ -186,7 +183,7 @@ export async function follow (clockNamespace, clock, target, emitter) {
  */
 export async function unfollow (clockNamespace, clock, target, emitter) {
   const stub = clockNamespace.get(clockNamespace.idFromName(clock))
-  const body = JSON.stringify({ method: 'unfollow', args: [target, emitter] })
+  const body = cbor.encode({ method: 'unfollow', args: [target, emitter] })
   await stub.fetch('http://localhost', { method: 'POST', body })
   if (clock !== target) {
     await unsubscribe(clockNamespace, target, clock, emitter)
@@ -199,9 +196,9 @@ export async function unfollow (clockNamespace, clock, target, emitter) {
  */
 export async function following (clockNamespace, clock) {
   const stub = clockNamespace.get(clockNamespace.idFromName(clock))
-  const body = JSON.stringify({ method: 'following', args: [] })
+  const body = cbor.encode({ method: 'following', args: [] })
   const res = await stub.fetch('http://localhost', { method: 'POST', body })
-  const data = /** @type {Array<[ClockDID, EmitterDID[]]>} */ (await res.json())
+  const data = /** @type {Array<[ClockDID, EmitterDID[]]>} */ (cbor.decode(new Uint8Array(await res.arrayBuffer())))
   return new Map(data.map(([k, v]) => [k, new Set(v)]))
 }
 
@@ -213,7 +210,7 @@ export async function following (clockNamespace, clock) {
  */
 async function subscribe (clockNamespace, clock, subscriber, emitter) {
   const stub = clockNamespace.get(clockNamespace.idFromName(clock))
-  const body = JSON.stringify({ method: 'subscribe', args: [subscriber, emitter] })
+  const body = cbor.encode({ method: 'subscribe', args: [subscriber, emitter] })
   await stub.fetch('http://localhost', { method: 'POST', body })
 }
 
@@ -225,7 +222,7 @@ async function subscribe (clockNamespace, clock, subscriber, emitter) {
  */
 async function unsubscribe (clockNamespace, clock, subscriber, emitter) {
   const stub = clockNamespace.get(clockNamespace.idFromName(clock))
-  const body = JSON.stringify({ method: 'unsubscribe', args: [subscriber, emitter] })
+  const body = cbor.encode({ method: 'unsubscribe', args: [subscriber, emitter] })
   await stub.fetch('http://localhost', { method: 'POST', body })
 }
 
@@ -236,9 +233,9 @@ async function unsubscribe (clockNamespace, clock, subscriber, emitter) {
  */
 async function subscribers (clockNamespace, clock) {
   const stub = clockNamespace.get(clockNamespace.idFromName(clock))
-  const body = JSON.stringify({ method: 'subscribers', args: [] })
+  const body = cbor.encode({ method: 'subscribers', args: [] })
   const res = await stub.fetch('http://localhost', { method: 'POST', body })
-  const data = /** @type {Array<[ClockDID, EmitterDID[]]>} */ (await res.json())
+  const data = /** @type {Array<[ClockDID, EmitterDID[]]>} */ (cbor.decode(new Uint8Array(await res.arrayBuffer())))
   return new Map(data.map(([k, v]) => [k, new Set(v)]))
 }
 
@@ -249,10 +246,9 @@ async function subscribers (clockNamespace, clock) {
  */
 export async function head (clockNamespace, clock) {
   const stub = clockNamespace.get(clockNamespace.idFromName(clock))
-  const body = JSON.stringify({ method: 'head', args: [] })
+  const body = cbor.encode({ method: 'head', args: [] })
   const res = await stub.fetch('http://localhost', { method: 'POST', body })
-  const data = /** @type {string[]} */ (await res.json())
-  return data.map(s => parse(s))
+  return cbor.decode(new Uint8Array(await res.arrayBuffer()))
 }
 
 /**
@@ -278,9 +274,9 @@ export async function advance (clockNamespace, clock, emitter, event) {
  */
 async function advanceAnyClock (clockNamespace, clock, target, emitter, event) {
   const stub = clockNamespace.get(clockNamespace.idFromName(clock))
-  const body = JSON.stringify({ method: 'advance', args: [target, emitter, event.toString()] })
+  const body = cbor.encode({ method: 'advance', args: [event] })
   const res = await stub.fetch('http://localhost', { method: 'POST', body })
-  const data = /** @type {string[]} */ (await res.json())
+  const data = /** @type {import('@alanshaw/pail/clock').EventLink<any>[]} */ (cbor.decode(new Uint8Array(await res.arrayBuffer())))
 
   // advance subscribers of this clock
   if (clock === target) {
@@ -292,5 +288,5 @@ async function advanceAnyClock (clockNamespace, clock, target, emitter, event) {
     }
   }
 
-  return data.map(s => parse(s))
+  return data
 }
