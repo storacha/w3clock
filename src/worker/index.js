@@ -5,7 +5,6 @@ import { createServer, createService } from './service.js'
 export default {
   /** @type {import('./types').Handler} */
   fetch (request, env, ctx) {
-    console.log(request.method, request.url)
     const middleware = composeMiddleware(
       withCORSPreflight,
       withCORSHeaders,

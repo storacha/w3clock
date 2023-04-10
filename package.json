@@ -5,10 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "npm run build:worker:debug && miniflare dist/worker.mjs --watch --debug -m",
-    "build": "npm run build:worker && npm run build:client",
+    "build": "npm run build:worker && npm run build:module",
     "build:worker": "esbuild --bundle src/worker/index.js --format=esm --sourcemap --minify --outfile=dist/worker.mjs",
     "build:worker:debug": "esbuild --bundle src/worker/index.js --format=esm --sourcemap --outfile=dist/worker.mjs",
-    "build:client": "tsc --build",
+    "build:module": "tsc --build",
     "test": "mocha --experimental-vm-modules 'test/**/*.test.js'",
     "coverage": "c8 --reporter=text --reporter=html --exclude=node_modules --exclude=test --exclude-after-remap npm run test",
     "lint": "standard"
@@ -30,6 +30,10 @@
     "./capabilities": {
       "types": "./dist/src/capabilities.d.ts",
       "import": "./src/client/capabilities.js"
+    },
+    "./server": {
+      "types": "./dist/src/server/index.d.ts",
+      "import": "./src/server/index.js"
     }
   },
   "typesVersions": {
@@ -42,27 +46,32 @@
       ],
       "capabilities": [
         "dist/src/capabilities.d.ts"
+      ],
+      "server": [
+        "dist/src/server/index.d.ts"
       ]
     }
   },
   "files": [
     "src/*.js",
     "src/client",
+    "src/server",
     "dist/src/*.d.ts",
     "dist/src/*.d.ts.map",
-    "dist/src/client"
+    "dist/src/client",
+    "dist/src/server"
   ],
   "dependencies": {
-    "@alanshaw/pail": "^0.3.0",
+    "@alanshaw/pail": "^0.3.3",
     "@ipld/dag-cbor": "^9.0.0",
-    "@ucanto/client": "^5.0.0",
-    "@ucanto/interface": "^5.0.0",
-    "@ucanto/principal": "^5.0.0",
-    "@ucanto/server": "^5.0.0",
-    "@ucanto/transport": "^5.0.0",
-    "@ucanto/validator": "^5.0.0",
+    "@ucanto/client": "^5.1.0",
+    "@ucanto/interface": "^6.2.0",
+    "@ucanto/principal": "^5.1.0",
+    "@ucanto/server": "^6.1.0",
+    "@ucanto/transport": "^5.1.1",
+    "@ucanto/validator": "^6.1.0",
     "hashlru": "^2.3.0",
-    "multiformats": "^11.0.1"
+    "multiformats": "^11.0.2"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20230115.0",

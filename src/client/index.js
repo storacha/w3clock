@@ -56,41 +56,41 @@ export async function head ({ issuer, with: resource, proofs, audience }, option
     .execute(conn)
 
   if (result.error) {
-    throw new Error(`failed ${ClockCaps.advance.can} invocation`, { cause: result })
+    throw new Error(`failed ${ClockCaps.head.can} invocation`, { cause: result })
   }
 
   return result
 }
 
-/**
- * Instruct a clock to follow the issuer, or optionally a different issuer,
- * contributing to a different clock.
- *
- * @template T
- * @param {import('./api').InvocationConfig} conf
- * @param {import('./api').FollowOptions<T>} [options]
- */
-export async function follow ({ issuer, with: resource, proofs, audience }, options) {
-  const conn = options?.connection ?? connect()
-  const result = await ClockCaps.follow
-    .invoke({
-      issuer,
-      audience: audience ?? conn.id,
-      with: resource,
-      nb: {
-        ...(options?.issuer ? { iss: options.issuer } : {}),
-        ...(options?.with ? { with: options.with } : {})
-      },
-      proofs
-    })
-    .execute(conn)
+// /**
+//  * Instruct a clock to follow the issuer, or optionally a different issuer,
+//  * contributing to a different clock.
+//  *
+//  * @template T
+//  * @param {import('./api').InvocationConfig} conf
+//  * @param {import('./api').FollowOptions<T>} [options]
+//  */
+// export async function follow ({ issuer, with: resource, proofs, audience }, options) {
+//   const conn = options?.connection ?? connect()
+//   const result = await ClockCaps.follow
+//     .invoke({
+//       issuer,
+//       audience: audience ?? conn.id,
+//       with: resource,
+//       nb: {
+//         ...(options?.issuer ? { iss: options.issuer } : {}),
+//         ...(options?.with ? { with: options.with } : {})
+//       },
+//       proofs
+//     })
+//     .execute(conn)
 
-  if (result.error) {
-    throw new Error(`failed ${ClockCaps.follow.can} invocation`, { cause: result })
-  }
+//   if (result.error) {
+//     throw new Error(`failed ${ClockCaps.follow.can} invocation`, { cause: result })
+//   }
 
-  return result
-}
+//   return result
+// }
 
 /**
  * @template T
