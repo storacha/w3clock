@@ -29,7 +29,7 @@
     },
     "./capabilities": {
       "types": "./dist/src/capabilities.d.ts",
-      "import": "./src/client/capabilities.js"
+      "import": "./src/capabilities.js"
     },
     "./server": {
       "types": "./dist/src/server/index.d.ts",
