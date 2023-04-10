@@ -24,7 +24,7 @@ Advance the clock by adding a new event.
 
 Get the current clock head.
 
-#### `clock/follow`
+<!-- #### `clock/follow`
 
 Follow advances made by an event issuer to a clock.
 
@@ -34,4 +34,4 @@ TBD
 
 #### `clock/unfollow`
 
-TBD
+TBD -->
