@@ -18,6 +18,7 @@ bindings = [
 # Production!
 [env.production]
 workers_dev = false
+account_id = "fffa4b4363a7e5250af8357087263b3a"
 
 [env.production.build]
 command = "npm run build"
@@ -25,6 +26,7 @@ command = "npm run build"
 # Staging!
 [env.staging]
 workers_dev = false
+account_id = "fffa4b4363a7e5250af8357087263b3a"
 
 [env.staging.build]
 command = "npm run build"
