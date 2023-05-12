@@ -1,19 +1,18 @@
 name = "w3clock"
-main = "src/worker/index.js"
+main = "dist/worker.mjs"
 compatibility_date = "2023-02-28"
 
 [build]
 command = "npm run build:worker:debug"
 
-[build.upload]
-format = "modules"
-dir = "dist"
-main = "worker.mjs"
-
 [durable_objects]
 bindings = [
   { name = "CLOCK", class_name = "DurableClock0" }
 ]
+
+[[migrations]]
+tag = "v1"
+new_classes = ["DurableClock0"]
 
 # Production!
 [env.production]
@@ -23,6 +22,11 @@ account_id = "fffa4b4363a7e5250af8357087263b3a"
 [env.production.build]
 command = "npm run build"
 
+[env.production.durable_objects]
+bindings = [
+  { name = "CLOCK", class_name = "DurableClock0" }
+]
+
 # Staging!
 [env.staging]
 workers_dev = false
@@ -30,6 +34,11 @@ account_id = "fffa4b4363a7e5250af8357087263b3a"
 
 [env.staging.build]
 command = "npm run build"
+
+[env.staging.durable_objects]
+bindings = [
+  { name = "CLOCK", class_name = "DurableClock0" }
+]
 
 # Test!
 [env.test]
