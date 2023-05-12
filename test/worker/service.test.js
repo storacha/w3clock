@@ -20,6 +20,7 @@ describe('UCAN service', () => {
     svc = await Signer.generate()
 
     mf = new Miniflare({
+      scriptPath: 'dist/worker.mjs',
       wranglerConfigPath: true,
       wranglerConfigEnv: 'test',
       modules: true,
