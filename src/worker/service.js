@@ -1,3 +1,5 @@
+import { parse } from '@ipld/dag-ucan/did'
+import * as dagCBOR from '@ipld/dag-cbor'
 import * as ClockCaps from '../capabilities.js'
 import * as Clock from './durable-clock.js'
 import { provide } from '../server/index.js'
@@ -45,17 +47,47 @@ export function createService ({ clockNamespace }) {
       advance: provide(
         ClockCaps.advance,
         async ({ capability, invocation }) => {
-          // @ts-expect-error
-          return await Clock.advance(clockNamespace, capability.with, invocation.issuer.did(), capability.nb.event)
+          const event = /** @type {import('@alanshaw/pail/clock').EventLink<any>} */ (capability.nb.event)
+          const blocks = filterEventBlocks(event, [...invocation.export()])
+          const resource = parse(capability.with).did()
+          const head = await Clock.advance(clockNamespace, resource, invocation.issuer.did(), event, blocks)
+          return { ok: { head } }
         }
       ),
       head: provide(
         ClockCaps.head,
         async ({ capability }) => {
-          // @ts-expect-error
-          return await Clock.head(clockNamespace, capability.with)
+          const resource = parse(capability.with).did()
+          const head = await Clock.head(clockNamespace, resource)
+          return { ok: { head } }
         }
       )
     }
   }
+}
+
+/**
+ * @param {import('@alanshaw/pail/clock').EventLink<any>} event
+ * @param {import('@ucanto/interface').Block[]} blocks
+ */
+function filterEventBlocks (event, blocks) {
+  /** @type {import('@ucanto/interface').Block<import('@alanshaw/pail/clock').EventView<any>>[]} */
+  const filteredBlocks = []
+  const cids = [event]
+  while (true) {
+    const cid = cids.shift()
+    if (!cid) break
+    const block = blocks.find(b => b.cid.equals(cid))
+    if (!block) continue
+    try {
+      /** @type {import('@alanshaw/pail/clock').EventView<any>} */
+      const value = dagCBOR.decode(block.bytes)
+      if (!Array.isArray(value.parents)) {
+        throw new Error(`invalid merkle clock event: ${cid}`)
+      }
+      cids.push(...value.parents)
+    } catch {}
+    filteredBlocks.push(block)
+  }
+  return filteredBlocks
 }

@@ -13,8 +13,8 @@ export interface Service<T> {
 }
 
 export interface ClockService<T> {
-  advance: ServiceMethod<ClockAdvance, EventLink<T>[], Failure>
-  head: ServiceMethod<ClockHead, EventLink<T>[], Failure>
+  advance: ServiceMethod<ClockAdvance, { head: EventLink<T>[] }, Failure>
+  head: ServiceMethod<ClockHead, { head: EventLink<T>[] }, Failure>
   // follow: ServiceMethod<ClockFollow, {}, Failure>
   // unfollow: ServiceMethod<ClockUnfollow, {}, Failure>
   // following: ServiceMethod<ClockFollowing, Array<[ClockDID, EmitterDID[]]>, Failure>

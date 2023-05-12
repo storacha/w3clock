@@ -1,7 +1,7 @@
 import * as Clock from '@alanshaw/pail/clock'
 import { parse } from 'multiformats/link'
 import * as cbor from '@ipld/dag-cbor'
-import { GatewayBlockFetcher } from './block.js'
+import { GatewayBlockFetcher, LRUBlockstore, MemoryBlockstore, MultiBlockFetcher, withCache } from './block.js'
 
 /**
  * @typedef {{ method: string, args: any[] }} MethodCall
@@ -22,6 +22,7 @@ const API_METHODS = ['follow', 'unfollow', 'following', 'subscribe', 'unsubscrib
 export class DurableClock {
   #state
   #fetcher
+  #cache
 
   /**
    * @param {import('@cloudflare/workers-types').DurableObjectState} state
@@ -29,7 +30,8 @@ export class DurableClock {
    */
   constructor (state, env) {
     this.#state = state
-    this.#fetcher = new GatewayBlockFetcher(env.GATEWAY_URL, env.BLOCK_CACHE_SIZE ? parseInt(env.BLOCK_CACHE_SIZE) : undefined)
+    this.#cache = new LRUBlockstore(env.BLOCK_CACHE_SIZE ? parseInt(env.BLOCK_CACHE_SIZE) : undefined)
+    this.#fetcher = new GatewayBlockFetcher(env.GATEWAY_URL)
   }
 
   /**
@@ -150,10 +152,17 @@ export class DurableClock {
 
   /**
    * @param {import('@alanshaw/pail/clock').EventLink<any>} event
+   * @param {import('@alanshaw/pail/clock').EventBlockView<import('@alanshaw/pail/clock').EventView<any>>[]} [blocks]
    */
-  async advance (event) {
+  async advance (event, blocks) {
     return await this.#state.blockConcurrencyWhile(async () => {
-      const head = (await Clock.advance(this.#fetcher, await this.head(), event))
+      const fetcher = withCache(
+        blocks?.length
+          ? new MultiBlockFetcher(new MemoryBlockstore(blocks), this.#fetcher)
+          : this.#fetcher,
+        this.#cache
+      )
+      const head = (await Clock.advance(fetcher, await this.head(), event))
       await this.#setHead(head)
       return head
     })
@@ -258,10 +267,11 @@ export async function head (clockNamespace, clock) {
  * @param {ClockDID} clock Clock to advance.
  * @param {EmitterDID} emitter Agent that is emitting events that contribute to the target.
  * @param {import('@alanshaw/pail/clock').EventLink<any>} event Event to advance the clock with.
+ * @param {import('multiformats').Block<import('@alanshaw/pail/clock').EventView<any>>[]} [blocks] Provided event blocks to advance the clock with.
  * @returns {Promise<import('@alanshaw/pail/clock').EventLink<any>[]>}
  */
-export async function advance (clockNamespace, clock, emitter, event) {
-  return advanceAnyClock(clockNamespace, clock, clock, emitter, event)
+export async function advance (clockNamespace, clock, emitter, event, blocks) {
+  return advanceAnyClock(clockNamespace, clock, clock, emitter, event, blocks)
 }
 
 /**
@@ -270,11 +280,15 @@ export async function advance (clockNamespace, clock, emitter, event) {
  * @param {ClockDID} target The clock targetted by events emitted by emitter.
  * @param {EmitterDID} emitter Agent that is emitting events that contribute to the target.
  * @param {import('@alanshaw/pail/clock').EventLink<any>} event Event to advance the clock with.
+ * @param {import('multiformats').Block<import('@alanshaw/pail/clock').EventView<any>>[]} [blocks] Provided event blocks to advance the clock with.
  * @returns {Promise<import('@alanshaw/pail/clock').EventLink<any>[]>}
  */
-async function advanceAnyClock (clockNamespace, clock, target, emitter, event) {
+async function advanceAnyClock (clockNamespace, clock, target, emitter, event, blocks = []) {
   const stub = clockNamespace.get(clockNamespace.idFromName(clock))
-  const body = cbor.encode({ method: 'advance', args: [event] })
+  const body = cbor.encode({
+    method: 'advance',
+    args: [event, blocks.map(b => ({ cid: b.cid, bytes: b.bytes }))]
+  })
   const res = await stub.fetch('http://localhost', { method: 'POST', body })
   const data = /** @type {import('@alanshaw/pail/clock').EventLink<any>[]} */ (cbor.decode(new Uint8Array(await res.arrayBuffer())))
 

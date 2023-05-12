@@ -1,6 +1,5 @@
 import { connect } from '@ucanto/client'
 import * as CAR from '@ucanto/transport/car'
-import * as CBOR from '@ucanto/transport/cbor'
 import * as HTTP from '@ucanto/transport/http'
 
 /**
@@ -13,8 +12,7 @@ import * as HTTP from '@ucanto/transport/http'
 export function miniflareConnection (miniflare, servicePrincipal) {
   return connect({
     id: servicePrincipal,
-    encoder: CAR,
-    decoder: CBOR,
+    codec: CAR.outbound,
     channel: HTTP.open({
       url: new URL('http://localhost:8787'),
       method: 'POST',

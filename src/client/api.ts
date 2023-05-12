@@ -1,4 +1,5 @@
-import { Signer, Proof, DID, Principal, ConnectionView } from '@ucanto/interface'
+import { Signer, Proof, DID, Principal, ConnectionView, Block } from '@ucanto/interface'
+import { EventView } from '@alanshaw/pail/clock'
 import { Service } from '../service'
 
 export interface InvocationConfig {
@@ -30,9 +31,18 @@ export interface FollowOptions<T> extends RequestOptions<T> {
   /**
    * Clock event issuer.
    */
-  issuer: DID
+  issuer?: DID
   /**
    * Target clock.
    */
-  with: DID
+  with?: DID
+}
+
+export interface AdvanceOptions<T> extends RequestOptions<T> {
+  /**
+   * Event blocks that may help the service to advance the clock. This are
+   * optional because event blocks _should_ be made available to fetch directly
+   * from the IPFS network.
+   */
+  blocks?: Block<EventView<any>>[]
 }

@@ -1,5 +1,5 @@
 import { connect as clientConnect } from '@ucanto/client'
-import { CAR, CBOR, HTTP } from '@ucanto/transport'
+import { CAR, HTTP } from '@ucanto/transport'
 import * as DID from '@ipld/dag-ucan/did'
 import * as ClockCaps from '../capabilities.js'
 
@@ -15,25 +15,26 @@ export const SERVICE_PRINCIPAL = 'did:web:clock.web3.storage'
  * @template T
  * @param {import('./api').InvocationConfig} conf
  * @param {import('@alanshaw/pail/clock').EventLink<T>} event
- * @param {import('./api').RequestOptions<T>} [options]
+ * @param {import('./api').AdvanceOptions<T>} [options]
  */
 export async function advance ({ issuer, with: resource, proofs, audience }, event, options) {
   const conn = options?.connection ?? connect()
-  const result = await ClockCaps.advance
+  const facts = options?.blocks ? [Object.fromEntries(options.blocks.map(b => [b.cid.toString(), b.cid]))] : []
+  const invocation = ClockCaps.advance
     .invoke({
       issuer,
       audience: audience ?? conn.id,
       with: resource,
       nb: { event },
-      proofs
+      proofs,
+      facts
     })
-    .execute(conn)
 
-  if (result.error) {
-    throw new Error(`failed ${ClockCaps.advance.can} invocation`, { cause: result })
+  for (const block of options?.blocks ?? []) {
+    invocation.attach(block)
   }
 
-  return result
+  return invocation.execute(conn)
 }
 
 /**
@@ -45,21 +46,14 @@ export async function advance ({ issuer, with: resource, proofs, audience }, eve
  */
 export async function head ({ issuer, with: resource, proofs, audience }, options) {
   const conn = options?.connection ?? connect()
-  const result = await ClockCaps.head
+  return await ClockCaps.head
     .invoke({
       issuer,
       audience: audience ?? conn.id,
       with: resource,
-      nb: {},
       proofs
     })
     .execute(conn)
-
-  if (result.error) {
-    throw new Error(`failed ${ClockCaps.head.can} invocation`, { cause: result })
-  }
-
-  return result
 }
 
 // /**
@@ -100,13 +94,10 @@ export async function head ({ issuer, with: resource, proofs, audience }, option
  * @returns {import('@ucanto/interface').ConnectionView<import('../service').Service<T>>}
  */
 export function connect (options) {
+  const url = options?.serviceURL ?? new URL(SERVICE_URL)
   return clientConnect({
     id: options?.servicePrincipal ?? DID.parse(SERVICE_PRINCIPAL),
-    encoder: CAR,
-    decoder: CBOR,
-    channel: HTTP.open({
-      url: options?.serviceURL ?? new URL(SERVICE_URL),
-      method: 'POST'
-    })
+    codec: CAR.outbound,
+    channel: HTTP.open({ url, method: 'POST' })
   })
 }

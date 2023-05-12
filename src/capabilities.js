@@ -1,4 +1,4 @@
-import { capability, URI, Link, Failure, Schema } from '@ucanto/validator'
+import { capability, URI, Link, Schema } from '@ucanto/validator'
 
 /**
  * @typedef {import('@ucanto/interface').InferInvokedCapability<typeof clock>} Clock
@@ -11,8 +11,7 @@ import { capability, URI, Link, Failure, Schema } from '@ucanto/validator'
 
 export const clock = capability({
   can: 'clock/*',
-  with: URI.match({ protocol: 'did:' }),
-  derives: equalWith
+  with: URI.match({ protocol: 'did:' })
 })
 
 /**
@@ -24,14 +23,7 @@ export const follow = capability({
   nb: Schema.struct({
     iss: URI.match({ protocol: 'did:' }).optional(),
     with: URI.match({ protocol: 'did:' }).optional()
-  }),
-  derives: (claim, proof) => {
-    let result = equalCaveat('with', claim, proof)
-    if (result !== true) return result
-    result = equalCaveat('iss', claim, proof)
-    if (result !== true) return result
-    return equalWith(claim, proof)
-  }
+  })
 })
 
 /**
@@ -43,14 +35,7 @@ export const unfollow = capability({
   nb: Schema.struct({
     iss: URI.match({ protocol: 'did:' }).optional(),
     with: URI.match({ protocol: 'did:' }).optional()
-  }),
-  derives: (claim, proof) => {
-    let result = equalCaveat('with', claim, proof)
-    if (result !== true) return result
-    result = equalCaveat('iss', claim, proof)
-    if (result !== true) return result
-    return equalWith(claim, proof)
-  }
+  })
 })
 
 /**
@@ -58,8 +43,7 @@ export const unfollow = capability({
  */
 export const following = capability({
   can: 'clock/following',
-  with: URI.match({ protocol: 'did:' }),
-  derives: equalWith
+  with: URI.match({ protocol: 'did:' })
 })
 
 /**
@@ -67,8 +51,7 @@ export const following = capability({
  */
 export const head = capability({
   can: 'clock/head',
-  with: URI.match({ protocol: 'did:' }),
-  derives: equalWith
+  with: URI.match({ protocol: 'did:' })
 })
 
 /**
@@ -79,38 +62,5 @@ export const advance = capability({
   with: URI.match({ protocol: 'did:' }),
   nb: Schema.struct({
     event: Link.match({ version: 1 })
-  }),
-  derives: equalWith
+  })
 })
-
-/**
- * Checks that `nb.<prop>` on claimed capability is the same as `nb.<prop>`
- * in delegated capability.
- *
- * @param {string} prop
- * @param {import('@ucanto/interface').ParsedCapability} claim
- * @param {import('@ucanto/interface').ParsedCapability} proof
- */
-function equalCaveat (prop, claim, proof) {
-  if (proof.nb[prop] !== claim.nb[prop]) {
-    if (proof.nb[prop] == null && claim.nb[prop] != null) {
-      return new Failure(`missing nb.${prop} on delegated capability: ${claim.nb[prop]}`)
-    } else if (proof.nb[prop] != null && claim.nb[prop] == null) {
-      return new Failure(`missing nb.${prop} on claimed capability: ${proof.nb[prop]}`)
-    } else {
-      return new Failure(`mismatched nb.${prop}: ${claim.nb[prop]} != ${proof.nb[prop]}`)
-    }
-  }
-  return true
-}
-
-/**
- * Checks that `with` on claimed capability is the same as `with`
- * in delegated capability. Note this will ignore `can` field.
- *
- * @param {import('@ucanto/interface').ParsedCapability} claim
- * @param {import('@ucanto/interface').ParsedCapability} proof
- */
-function equalWith (claim, proof) {
-  return claim.with === proof.with || new Failure(`Can not derive ${claim.can} with ${claim.with} from ${proof.with}`)
-}
