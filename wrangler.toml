@@ -22,6 +22,9 @@ account_id = "fffa4b4363a7e5250af8357087263b3a"
 [env.production.build]
 command = "npm run build"
 
+[env.production.vars]
+DID = "did:web:clock.web3.storage"
+
 [env.production.durable_objects]
 bindings = [
   { name = "CLOCK", class_name = "DurableClock0" }
@@ -34,6 +37,9 @@ account_id = "fffa4b4363a7e5250af8357087263b3a"
 
 [env.staging.build]
 command = "npm run build"
+
+[env.staging.vars]
+DID = "did:web:clock-staging.web3.storage"
 
 [env.staging.durable_objects]
 bindings = [

@@ -2,7 +2,10 @@ import { DurableObjectNamespace } from '@cloudflare/workers-types'
 
 export interface Environment {
   DEBUG?: string
+  /** Base64 encoded Ed25519 private key. */
   PRIVATE_KEY: string
+  /** Optional DID of the service, if different from the did:key. e.g. did:web:... */
+  DID?: string
   GATEWAY_URL?: string
   BLOCK_CACHE_SIZE?: string
   CLOCK: DurableObjectNamespace
