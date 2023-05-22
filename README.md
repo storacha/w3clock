@@ -16,6 +16,8 @@
 
 Merkle clocks are a method of recording events with partial order. This repo implements a method of managing merkle clocks with UCANs.
 
+Read the [SPEC](https://github.com/web3-storage/specs/blob/main/w3-clock.md).
+
 ### Capabilities
 
 #### `clock/advance`
