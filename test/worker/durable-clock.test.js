@@ -2,7 +2,7 @@ import { describe, it } from 'mocha'
 import assert from 'assert'
 import { Signer } from '@ucanto/principal/ed25519'
 import { DurableClock, follow, following, unfollow } from '../../src/worker/durable-clock.js'
-import { MockState, MockStorage, MockNamespace } from '../helpers/durable-objects.js'
+import { MockState, MockStorage, MockNamespace, MockInvoke } from '../helpers/durable-objects.js'
 
 describe('DurableClock', () => {
   it('follows', async () => {
@@ -118,6 +118,21 @@ describe('DurableClock', () => {
     emitters = followings.get(sundial.did())
     assert(!emitters)
   })
+  it('trivially passes with MockInvoke', async () => {
+    const sundial = await Signer.generate()
+
+    const namespace = new MockNamespace()
+    const id = namespace.idFromName(sundial.did())
+    const storage = new MockStorage()
+    const state = new MockState(id, storage)
+    const obj = new DurableClock(state, { DEBUG: 'true', PRIVATE_KEY: 'secret', CLOCK: namespace })
+    namespace.set(id, obj)
+
+    const mockInvoke = new MockInvoke(state)
+    const result = await mockInvoke.invoke({ method: 'trivial', args: [] })
+
+    assert.equal(result, 'Trivially passed')
+  })
   it('should handle multi-user clock advancement and fetch', async () => {
     const alice = await Signer.generate()
     const bob = await Signer.generate()
@@ -147,22 +162,26 @@ describe('DurableClock', () => {
     namespaceBob.set(idBob, clockBob)
     namespaceCarol.set(idCarol, clockCarol)
 
+    const invokeAlice = new MockInvoke('Alice event')
+    const invokeBob = new MockInvoke('Bob event')
+    const invokeCarol = new MockInvoke('Carol event')
+
     // Advance Alice's clock
-    const eventAlice = await invoke(alice, clockAlice, 'clock/advance')
+    const eventAlice = await invokeAlice.invoke({ method: 'clock/advance', args: [] }, alice)
     assert(eventAlice)
 
     // Advance Bob's clock with a reference to Alice's event
-    const eventBob = await invoke(bob, clockBob, 'clock/advance', eventAlice)
+    const eventBob = await invokeBob.invoke({ method: 'clock/advance', args: [eventAlice] }, bob)
     assert(eventBob)
 
     // Advance Carol's clock with a reference to Bob's event
-    const eventCarol = await invoke(carol, clockCarol, 'clock/advance', eventBob)
+    const eventCarol = await invokeCarol.invoke({ method: 'clock/advance', args: [eventBob] }, carol)
     assert(eventCarol)
 
     // Alice, Bob, and Carol fetch the current head of their clocks
-    const headAlice = await invoke(alice, clockAlice, 'clock/head')
-    const headBob = await invoke(bob, clockBob, 'clock/head')
-    const headCarol = await invoke(carol, clockCarol, 'clock/head')
+    const headAlice = await invokeAlice.invoke({ method: 'clock/head', args: [] }, alice)
+    const headBob = await invokeBob.invoke({ method: 'clock/head', args: [] }, bob)
+    const headCarol = await invokeCarol.invoke({ method: 'clock/head', args: [] }, carol)
 
     // Validate the heads
     assert(headAlice)
@@ -170,15 +189,16 @@ describe('DurableClock', () => {
     assert(headCarol)
 
     // Validate that each clock head points to the correct event
-    assert.deepEqual(headAlice, await fetchClockEvent(eventAlice))
-    assert.deepEqual(headBob, await fetchClockEvent(eventBob))
-    assert.deepEqual(headCarol, await fetchClockEvent(eventCarol))
+    assert.deepEqual(headAlice, await mockFetchClockEvent(eventAlice))
+    assert.deepEqual(headBob, await mockFetchClockEvent(eventBob))
+    assert.deepEqual(headCarol, await mockFetchClockEvent(eventCarol))
 
     // Validate that each user can fetch the others' updates
-    assert.deepEqual(await invoke(alice, clockAlice, 'clock/head', eventBob), await fetchClockEvent(eventBob))
-    assert.deepEqual(await invoke(bob, clockBob, 'clock/head', eventCarol), await fetchClockEvent(eventCarol))
-    assert.deepEqual(await invoke(carol, clockCarol, 'clock/head', eventAlice), await fetchClockEvent(eventAlice))
+    assert.deepEqual(await invokeAlice.invoke({ method: 'clock/head', args: [eventBob] }, alice), await mockFetchClockEvent(eventAlice))
+    assert.deepEqual(await invokeBob.invoke({ method: 'clock/head', args: [eventCarol] }, bob), await mockFetchClockEvent(eventBob))
+    assert.deepEqual(await invokeCarol.invoke({ method: 'clock/head', args: [eventAlice] }, carol), await mockFetchClockEvent(headCarol))
   })
+
   it('throws error when stub.fetch fails', async () => {
     const sundial = await Signer.generate()
     const alice = await Signer.generate()
@@ -226,7 +246,7 @@ async function invoke (user, clock, command, event) {
   }
 }
 
-async function fetchClockEvent (event) {
+async function mockFetchClockEvent (event) {
   // Assuming this function fetches and returns the clock event, based on the 'event' parameter
   // You should replace this implementation with your own
   return event
