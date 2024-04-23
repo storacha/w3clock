@@ -14,6 +14,8 @@ export function createServer (signer, service) {
     codec: CAR.inbound,
     service,
     catch: err => console.error(err),
+    // TODO: wire into revocations
+    validateAuthorization: () => ({ ok: {} }),
     // @ts-expect-error
     authorities: [Verifier.parse('did:key:z6MkqdncRZ1wj8zxCTDUQ8CRT8NQWd63T7mZRvZUX8B7XDFi').withDID('did:web:web3.storage')]
   })
