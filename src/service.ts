@@ -1,7 +1,7 @@
 import { Failure, ServiceMethod, DID } from '@ucanto/interface'
 import { ClockAdvance, ClockHead } from './capabilities.js'
 // import { ClockFollow, ClockUnfollow, ClockFollowing } from './capabilities.js'
-import { EventLink } from '@alanshaw/pail/clock'
+import { EventLink } from '@web3-storage/pail/clock/api'
 
 /** DID of a merkle clock. */
 export type ClockDID = DID

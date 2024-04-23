@@ -2,8 +2,8 @@ import { describe, it, beforeEach } from 'mocha'
 import assert from 'assert'
 import { Miniflare } from 'miniflare'
 import { Signer } from '@ucanto/principal/ed25519'
-import { ShardBlock } from '@alanshaw/pail'
-import { EventBlock } from '@alanshaw/pail/clock'
+import { ShardBlock } from '@web3-storage/pail/shard'
+import { EventBlock } from '@web3-storage/pail/clock'
 import { parse } from 'multiformats/link'
 import * as ClockCaps from '../../src/capabilities.js'
 import { miniflareConnection } from '../helpers/ucanto.js'
@@ -51,7 +51,7 @@ describe('UCAN service', () => {
 
     const shard = await ShardBlock.create()
 
-    /** @type {import('@alanshaw/pail/crdt').EventData} */
+    /** @type {import('@web3-storage/pail/crdt/api').Operation} */
     const data = { type: 'put', root: shard.cid, key: 'guardian', value: parse('bafkreigh2akiscaildcqabsyg3dfr6chu3fgpregiymsck7e7aqa4s52zy') }
     const event = await EventBlock.create(data)
 

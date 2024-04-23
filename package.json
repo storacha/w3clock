@@ -62,18 +62,18 @@
     "dist/src/server"
   ],
   "dependencies": {
-    "@alanshaw/pail": "^0.3.3",
     "@ipld/dag-cbor": "^9.0.0",
     "@ipld/dag-ucan": "^3.3.2",
-    "@ucanto/client": "^7.0.1",
-    "@ucanto/interface": "^7.1.0",
-    "@ucanto/principal": "^7.0.0",
-    "@ucanto/server": "^7.0.2",
-    "@ucanto/transport": "^7.0.3",
-    "@ucanto/validator": "^7.0.0",
+    "@ucanto/client": "^9.0.1",
+    "@ucanto/interface": "^10.0.1",
+    "@ucanto/principal": "^9.0.1",
+    "@ucanto/server": "^10.0.0",
+    "@ucanto/transport": "^9.1.1",
+    "@ucanto/validator": "^9.0.2",
+    "@web3-storage/pail": "^0.5.0",
     "hashlru": "^2.3.0",
-    "multiformats": "^11.0.2",
-    "p-retry": "^5.1.2"
+    "multiformats": "^13.1.0",
+    "p-retry": "^6.2.0"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20230115.0",

@@ -1,30 +1,29 @@
 import retry from 'p-retry'
 import LRU from 'hashlru'
+import { sha256 } from 'multiformats/hashes/sha2'
+import { equals } from 'multiformats/bytes'
 
-export { MultiBlockFetcher } from '@alanshaw/pail/block'
+export { MultiBlockFetcher } from '@web3-storage/pail/block'
 
 /**
- * @typedef {{ put: (block: import('@alanshaw/pail/block').AnyBlock) => Promise<void> }} BlockPutter
+ * @typedef {{ put: (block: import('multiformats').Block) => Promise<void> }} BlockPutter
  */
 
 export class MemoryBlockstore {
-  /** @param {import('@alanshaw/pail/block').AnyBlock[]} [blocks] */
+  /** @param {Array<import('multiformats').Block>} [blocks] */
   constructor (blocks = []) {
     /** @type {{ get: (k: string) => Uint8Array | undefined, set: (k: string, v: Uint8Array) => void }} */
     this._data = new Map(blocks.map(b => [b.cid.toString(), b.bytes]))
   }
 
-  /**
-   * @param {import('@alanshaw/pail/link').AnyLink} cid
-   * @returns {Promise<import('@alanshaw/pail/block').AnyBlock | undefined>}
-   */
+  /** @type { import('@web3-storage/pail/api').BlockFetcher['get']} */
   async get (cid) {
     const bytes = this._data.get(cid.toString())
     if (!bytes) return
     return { cid, bytes }
   }
 
-  /** @param {import('@alanshaw/pail/block').AnyBlock} block */
+  /** @param {import('multiformats').Block} block */
   async put (block) {
     this._data.set(block.cid.toString(), block.bytes)
   }
@@ -39,15 +38,12 @@ export class LRUBlockstore extends MemoryBlockstore {
 }
 
 /**
- * @param {import('@alanshaw/pail/block').BlockFetcher} fetcher
- * @param {import('@alanshaw/pail/block').BlockFetcher & BlockPutter} cache
+ * @param {import('@web3-storage/pail/api').BlockFetcher} fetcher
+ * @param {import('@web3-storage/pail/api').BlockFetcher & BlockPutter} cache
  */
 export function withCache (fetcher, cache) {
   return {
-    /**
-     * @param {import('@alanshaw/pail/link').AnyLink} cid
-     * @returns {Promise<import('@alanshaw/pail/block').AnyBlock | undefined>}
-     */
+    /** @type { import('@web3-storage/pail/api').BlockFetcher['get']} */
     async get (cid) {
       try {
         const block = await cache.get(cid)
@@ -55,6 +51,7 @@ export function withCache (fetcher, cache) {
       } catch {}
       const block = await fetcher.get(cid)
       if (block) {
+        // @ts-expect-error
         await cache.put(block)
       }
       return block
@@ -70,10 +67,7 @@ export class GatewayBlockFetcher {
     this.#url = new URL(url ?? 'https://ipfs.io')
   }
 
-  /**
-   * @param {import('@alanshaw/pail/link').AnyLink} cid
-   * @returns {Promise<import('@alanshaw/pail/block').AnyBlock | undefined>}
-   */
+  /** @type { import('@web3-storage/pail/api').BlockFetcher['get']} */
   async get (cid) {
     return await retry(async () => {
       const controller = new AbortController()
@@ -82,6 +76,10 @@ export class GatewayBlockFetcher {
         const res = await fetch(new URL(`/ipfs/${cid}?format=raw`, this.#url), { signal: controller.signal })
         if (!res.ok) return
         const bytes = new Uint8Array(await res.arrayBuffer())
+        const digest = await sha256.digest(bytes)
+        if (!equals(digest.digest, cid.multihash.digest)) {
+          throw new Error(`failed sha2-256 content integrity check: ${cid}`)
+        }
         return { cid, bytes }
       } catch (err) {
         throw new Error(`failed to fetch block: ${cid}`, { cause: err })

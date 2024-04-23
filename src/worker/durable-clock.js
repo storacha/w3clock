@@ -1,4 +1,4 @@
-import * as Clock from '@alanshaw/pail/clock'
+import * as Clock from '@web3-storage/pail/clock'
 import { parse } from 'multiformats/link'
 import * as cbor from '@ipld/dag-cbor'
 import { GatewayBlockFetcher, LRUBlockstore, MemoryBlockstore, MultiBlockFetcher, withCache } from './block.js'
@@ -137,12 +137,12 @@ export class DurableClock {
     return [...subscribers.entries()].map(([k, v]) => [k, [...v.values()]])
   }
 
-  /** @param {import('@alanshaw/pail/clock').EventLink<any>[]} head */
+  /** @param {import('@web3-storage/pail/clock/api').EventLink<any>[]} head */
   async #setHead (head) {
     await this.#state.storage.put(KEY_HEAD, head.map(h => String(h)))
   }
 
-  /** @returns {Promise<import('@alanshaw/pail/clock').EventLink<any>[]>} */
+  /** @returns {Promise<import('@web3-storage/pail/clock/api').EventLink<any>[]>} */
   async head () {
     // TODO: keep sync'd copy in memory
     /** @type {string[]} */
@@ -151,8 +151,8 @@ export class DurableClock {
   }
 
   /**
-   * @param {import('@alanshaw/pail/clock').EventLink<any>} event
-   * @param {import('@alanshaw/pail/clock').EventBlockView<import('@alanshaw/pail/clock').EventView<any>>[]} [blocks]
+   * @param {import('@web3-storage/pail/clock/api').EventLink<any>} event
+   * @param {import('@web3-storage/pail/clock/api').EventBlockView<import('@web3-storage/pail/clock/api').EventView<any>>[]} [blocks]
    */
   async advance (event, blocks) {
     return await this.#state.blockConcurrencyWhile(async () => {
@@ -251,7 +251,7 @@ async function subscribers (clockNamespace, clock) {
 /**
  * @param {import('@cloudflare/workers-types').DurableObjectNamespace} clockNamespace Durable Object API
  * @param {ClockDID} clock Clock we want the head of.
- * @returns {Promise<import('@alanshaw/pail/clock').EventLink<any>[]>}
+ * @returns {Promise<import('@web3-storage/pail/clock/api').EventLink<any>[]>}
  */
 export async function head (clockNamespace, clock) {
   const stub = clockNamespace.get(clockNamespace.idFromName(clock))
@@ -266,9 +266,9 @@ export async function head (clockNamespace, clock) {
  * @param {import('@cloudflare/workers-types').DurableObjectNamespace} clockNamespace Durable Object API
  * @param {ClockDID} clock Clock to advance.
  * @param {EmitterDID} emitter Agent that is emitting events that contribute to the target.
- * @param {import('@alanshaw/pail/clock').EventLink<any>} event Event to advance the clock with.
- * @param {import('multiformats').Block<import('@alanshaw/pail/clock').EventView<any>>[]} [blocks] Provided event blocks to advance the clock with.
- * @returns {Promise<import('@alanshaw/pail/clock').EventLink<any>[]>}
+ * @param {import('@web3-storage/pail/clock/api').EventLink<any>} event Event to advance the clock with.
+ * @param {import('multiformats').Block<import('@web3-storage/pail/clock/api').EventView<any>>[]} [blocks] Provided event blocks to advance the clock with.
+ * @returns {Promise<import('@web3-storage/pail/clock/api').EventLink<any>[]>}
  */
 export async function advance (clockNamespace, clock, emitter, event, blocks) {
   return advanceAnyClock(clockNamespace, clock, clock, emitter, event, blocks)
@@ -279,9 +279,9 @@ export async function advance (clockNamespace, clock, emitter, event, blocks) {
  * @param {ClockDID} clock The clock that this event should advance.
  * @param {ClockDID} target The clock targetted by events emitted by emitter.
  * @param {EmitterDID} emitter Agent that is emitting events that contribute to the target.
- * @param {import('@alanshaw/pail/clock').EventLink<any>} event Event to advance the clock with.
- * @param {import('multiformats').Block<import('@alanshaw/pail/clock').EventView<any>>[]} [blocks] Provided event blocks to advance the clock with.
- * @returns {Promise<import('@alanshaw/pail/clock').EventLink<any>[]>}
+ * @param {import('@web3-storage/pail/clock/api').EventLink<any>} event Event to advance the clock with.
+ * @param {import('multiformats').Block<import('@web3-storage/pail/clock/api').EventView<any>>[]} [blocks] Provided event blocks to advance the clock with.
+ * @returns {Promise<import('@web3-storage/pail/clock/api').EventLink<any>[]>}
  */
 async function advanceAnyClock (clockNamespace, clock, target, emitter, event, blocks = []) {
   const stub = clockNamespace.get(clockNamespace.idFromName(clock))
@@ -290,7 +290,7 @@ async function advanceAnyClock (clockNamespace, clock, target, emitter, event, b
     args: [event, blocks.map(b => ({ cid: b.cid, bytes: b.bytes }))]
   })
   const res = await stub.fetch('http://localhost', { method: 'POST', body })
-  const data = /** @type {import('@alanshaw/pail/clock').EventLink<any>[]} */ (cbor.decode(new Uint8Array(await res.arrayBuffer())))
+  const data = /** @type {import('@web3-storage/pail/clock/api').EventLink<any>[]} */ (cbor.decode(new Uint8Array(await res.arrayBuffer())))
 
   // advance subscribers of this clock
   if (clock === target) {

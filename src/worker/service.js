@@ -47,7 +47,7 @@ export function createService ({ clockNamespace }) {
       advance: provide(
         ClockCaps.advance,
         async ({ capability, invocation }) => {
-          const event = /** @type {import('@alanshaw/pail/clock').EventLink<any>} */ (capability.nb.event)
+          const event = /** @type {import('@web3-storage/pail/clock/api').EventLink<any>} */ (capability.nb.event)
           const blocks = filterEventBlocks(event, [...invocation.export()])
           const resource = parse(capability.with).did()
           const head = await Clock.advance(clockNamespace, resource, invocation.issuer.did(), event, blocks)
@@ -67,11 +67,11 @@ export function createService ({ clockNamespace }) {
 }
 
 /**
- * @param {import('@alanshaw/pail/clock').EventLink<any>} event
+ * @param {import('@web3-storage/pail/clock/api').EventLink<any>} event
  * @param {import('@ucanto/interface').Block[]} blocks
  */
 function filterEventBlocks (event, blocks) {
-  /** @type {import('@ucanto/interface').Block<import('@alanshaw/pail/clock').EventView<any>>[]} */
+  /** @type {import('@ucanto/interface').Block<import('@web3-storage/pail/clock/api').EventView<any>>[]} */
   const filteredBlocks = []
   const cids = [event]
   while (true) {
@@ -80,7 +80,7 @@ function filterEventBlocks (event, blocks) {
     const block = blocks.find(b => b.cid.equals(cid))
     if (!block) continue
     try {
-      /** @type {import('@alanshaw/pail/clock').EventView<any>} */
+      /** @type {import('@web3-storage/pail/clock/api').EventView<any>} */
       const value = dagCBOR.decode(block.bytes)
       if (!Array.isArray(value.parents)) {
         throw new Error(`invalid merkle clock event: ${cid}`)

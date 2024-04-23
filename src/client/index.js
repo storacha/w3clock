@@ -14,7 +14,7 @@ export const SERVICE_PRINCIPAL = 'did:web:clock.web3.storage'
  *
  * @template T
  * @param {import('./api').InvocationConfig} conf
- * @param {import('@alanshaw/pail/clock').EventLink<T>} event
+ * @param {import('@web3-storage/pail/clock/api').EventLink<T>} event
  * @param {import('./api').AdvanceOptions<T>} [options]
  */
 export async function advance ({ issuer, with: resource, proofs, audience }, event, options) {
