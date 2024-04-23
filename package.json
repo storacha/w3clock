@@ -23,9 +23,21 @@
   "author": "Alan Shaw",
   "license": "Apache-2.0 OR MIT",
   "exports": {
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "import": "./src/index.js"
+    },
+    "./api": {
+      "types": "./dist/src/api.d.ts",
+      "import": "./src/api.js"
+    },
     "./client": {
       "types": "./dist/src/client/index.d.ts",
       "import": "./src/client/index.js"
+    },
+    "./client/api": {
+      "types": "./dist/src/client/api.d.ts",
+      "import": "./src/client/api.js"
     },
     "./capabilities": {
       "types": "./dist/src/capabilities.d.ts",
@@ -41,8 +53,14 @@
       "*": [
         "dist/*"
       ],
+      "api": [
+        "dist/src/api.d.ts"
+      ],
       "client": [
         "dist/src/client/index.d.ts"
+      ],
+      "client/api": [
+        "dist/src/client/api.d.ts"
       ],
       "capabilities": [
         "dist/src/capabilities.d.ts"

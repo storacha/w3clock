@@ -5,8 +5,8 @@ import { GatewayBlockFetcher, LRUBlockstore, MemoryBlockstore, MultiBlockFetcher
 
 /**
  * @typedef {{ method: string, args: any[] }} MethodCall
- * @typedef {import('../service').EmitterDID} EmitterDID DID of an clock event emitter (usually an agent).
- * @typedef {import('../service').ClockDID} ClockDID DID of a merkle clock.
+ * @typedef {import('../api.js').EmitterDID} EmitterDID DID of an clock event emitter (usually an agent).
+ * @typedef {import('../api.js').ClockDID} ClockDID DID of a merkle clock.
  * @typedef {Map<ClockDID, Set<EmitterDID>>} Followings Event emitters that this clock is following (and the associated clock DID they are contributing to).
  * @typedef {Map<ClockDID, Set<EmitterDID>>} Subscribers Clocks that want to receive advances made to this clock.
  * @typedef {'follow'|'unfollow'|'following'|'subscribe'|'unsubscribe'|'subscribers'|'advance'|'head'} DurableClockAPIMethod

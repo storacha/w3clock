@@ -9,7 +9,7 @@ export { createServer } from '../server/index.js'
 /**
  * @template T
  * @param {{ clockNamespace: import('@cloudflare/workers-types').DurableObjectNamespace }} conf
- * @returns {import('../service').Service<T>}
+ * @returns {import('../api.js').Service<T>}
  */
 export function createService ({ clockNamespace }) {
   return {

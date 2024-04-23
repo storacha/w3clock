@@ -3,9 +3,6 @@ import { CAR, HTTP } from '@ucanto/transport'
 import * as DID from '@ipld/dag-ucan/did'
 import * as ClockCaps from '../capabilities.js'
 
-export * from './api.js'
-export * from '../service.js'
-
 export const SERVICE_URL = 'https://clock.web3.storage'
 export const SERVICE_PRINCIPAL = 'did:web:clock.web3.storage'
 
@@ -91,7 +88,7 @@ export async function head ({ issuer, with: resource, proofs, audience }, option
  * @param {object} [options]
  * @param {import('@ucanto/interface').Principal} [options.servicePrincipal]
  * @param {URL} [options.serviceURL]
- * @returns {import('@ucanto/interface').ConnectionView<import('../service').Service<T>>}
+ * @returns {import('@ucanto/interface').ConnectionView<import('../api.js').Service<T>>}
  */
 export function connect (options) {
   const url = options?.serviceURL ?? new URL(SERVICE_URL)

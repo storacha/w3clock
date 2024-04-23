@@ -1,6 +1,6 @@
 import { Signer, Proof, DID, Principal, ConnectionView, Block } from '@ucanto/interface'
 import { EventView } from '@web3-storage/pail/clock/api'
-import { Service } from '../service'
+import { Service } from '../api'
 
 export interface InvocationConfig {
   /**
